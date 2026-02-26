@@ -1,10 +1,12 @@
 package routes
 
 import (
+	"database/sql"
 	"errors"
 	"net/http"
 	"vita-track-ai/models"
 	"vita-track-ai/repository"
+	"vita-track-ai/utility"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +15,15 @@ type SignupRequest struct {
 	Email    string `form:"email" binding:"required,email"`
 	Password string `form:"password" binding:"required,min=8"`
 	Name     string `form:"name" binding:"required"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
+type GoogleLoginRequest struct {
+	Token string `json:"token" binding:"required"`
 }
 
 func signup(context *gin.Context) {
@@ -57,8 +68,138 @@ func signup(context *gin.Context) {
 
 func login(context *gin.Context) {
 
+	var loginRequest LoginRequest
+	err := context.ShouldBindBodyWithJSON(&loginRequest)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Unable to pass the values into the user object",
+			"error":   err.Error(),
+		})
+
+		return
+	}
+
+	var user models.User
+	user.Email = loginRequest.Email
+	user.Password = &loginRequest.Password
+
+	err = repository.ValidateCredential(&user) //user struct gets updated with db values here
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid Password",
+			"error":   err.Error(),
+		})
+
+		return
+	}
+
+	token, err := utility.GenerateToken(user.Email, user.UserId)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Some problem in generating jwt token",
+		})
+
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Successfully login",
+		"token":   token,
+		"user":    user,
+	})
+
 }
 
 func googleLogin(context *gin.Context) {
+	var req GoogleLoginRequest
+	err := context.ShouldBindJSON(&req)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Unable to pass the values into the GoogleLoginRequest",
+			"error":   err.Error(),
+		})
+
+		return
+	}
+
+	payload, err := utility.VerifyGoogkeIDTokenAndGetPayLoad(req.Token)
+
+	if err != nil {
+		context.JSON(401, gin.H{
+			"message": "Invalid google token",
+			"error":   err.Error(),
+		})
+
+		return
+	}
+
+	claims := payload.Claims
+
+	email := utility.GetClaim("email", claims)
+	name := utility.GetClaim("name", claims)
+	picture := utility.GetClaim("picture", claims)
+	googleId := payload.Subject
+
+	var userModel models.User
+	userModel, err = repository.GetUserModelByEmail(email)
+
+	if err == sql.ErrNoRows {
+		userModel.Email = email
+		userModel.Name = name
+		userModel.ProfilePic = &picture
+		userModel.GoogleId = &googleId
+		err = repository.SaveUser(&userModel)
+
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Problem in saving the user",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+	} else if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Some issue with the database",
+			"error":   err.Error(),
+		})
+
+		return
+	}
+
+	if userModel.GoogleId == nil {
+		userModel.GoogleId = &googleId
+		err = repository.UpdateGoogleId(&userModel)
+
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Some problem in updating the google id",
+				"error":   err.Error(),
+			})
+
+			return
+		}
+	}
+
+	token, err := utility.GenerateToken(userModel.Email, userModel.UserId)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Some problem with generating the token",
+			"error":   err.Error(),
+		})
+
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Google login successful",
+		"user":    userModel,
+		"token":   token,
+	})
 
 }
