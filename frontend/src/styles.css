@@ -77,7 +77,10 @@ textarea::placeholder {
 }
 
 /* Base Button Styles */
-button {
+button,
+.btn,
+.btn-primary,
+.btn-secondary {
     cursor: pointer;
     border: none;
     border-radius: var(--radius-md);
@@ -91,13 +94,13 @@ button {
     gap: 8px;
 }
 
-button.btn-primary {
+.btn-primary {
     background-color: var(--primary);
     color: white;
     box-shadow: 0 4px 6px rgba(13, 148, 136, 0.25);
 }
 
-button.btn-primary:hover {
+.btn-primary:hover {
     background-color: var(--primary-hover);
     transform: translateY(-1px);
     box-shadow: 0 6px 8px rgba(13, 148, 136, 0.3);
