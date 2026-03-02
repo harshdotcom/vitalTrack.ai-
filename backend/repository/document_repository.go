@@ -32,7 +32,16 @@ func GetDocumentsByMonth(userID int64, req models.CalendarRequest) ([]models.Doc
 
 	var docs []models.Document
 
-	start := time.Date(req.Year, time.Month(req.Month), 1, 0, 0, 0, 0, time.UTC)
+	loc := time.Now().Location()
+
+	start := time.Date(
+		req.Year,
+		time.Month(req.Month),
+		1,
+		0, 0, 0, 0,
+		loc,
+	)
+
 	end := start.AddDate(0, 1, 0)
 
 	query := database.DB.

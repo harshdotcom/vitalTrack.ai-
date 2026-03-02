@@ -42,7 +42,23 @@ func CreateDocument(c *gin.Context) {
 
 	tagsJSON, _ := json.Marshal(req.Tags)
 	userID := c.MustGet("user_id").(int64)
-	parsedDate, _ := time.Parse("2006-01-02", req.ReportDate)
+	var parsedDate time.Time
+
+	if req.ReportDate != "" {
+		var err error
+		parsedDate, err = time.Parse("2006-01-02", req.ReportDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "invalid report_date format (use YYYY-MM-DD)",
+			})
+			return
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "report_date is required",
+		})
+		return
+	}
 
 	doc := models.Document{
 		UserID:     userID,
