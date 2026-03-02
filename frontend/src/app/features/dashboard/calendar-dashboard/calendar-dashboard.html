@@ -57,7 +57,20 @@
                     <div class="documents-list">
                         <div *ngFor="let doc of cell.documents | slice:0:3" class="doc-badge" [title]="doc.report_type"
                             (click)="openDocumentDetails(doc.id); $event.stopPropagation()">
-                            {{ doc.report_type }}
+                            <span class="doc-badge-text">{{ doc.report_type }}</span>
+                            <span class="delete-icon" title="Delete"
+                                (click)="openDeleteModal(doc); $event.stopPropagation()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path
+                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                    </path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </span>
                         </div>
                         <div *ngIf="cell.documents.length > 3" class="doc-badge more-badge"
                             (click)="openDayModal(cell.date, cell.documents); $event.stopPropagation()">
@@ -143,9 +156,19 @@
             </div>
             <div class="modal-body" style="display: flex; flex-direction: column; gap: 8px;">
                 <div *ngFor="let doc of selectedDayDocuments" class="doc-badge"
-                    style="cursor: pointer; padding: 12px; display: block; text-align: center; font-size: 1rem;"
+                    style="cursor: pointer; padding: 12px; display: flex; align-items: center; justify-content: space-between; font-size: 1rem;"
                     (click)="openDocumentDetails(doc.id); closeDayModal()">
-                    {{ doc.report_type }}
+                    <span>{{ doc.report_type }}</span>
+                    <span class="delete-icon" title="Delete" (click)="openDeleteModal(doc); $event.stopPropagation()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                    </span>
                 </div>
             </div>
         </div>
@@ -174,17 +197,17 @@
                         <ng-container *ngIf="selectedFileUrl; else noFile">
                             <!-- Image View -->
                             <img *ngIf="isImageFile()" [src]="selectedFileUrl" alt="Medical Report"
-                                class="file-viewer" />
+                                class="file-viewer clickable-image" [title]="'Click to enlarge'"
+                                (click)="isFullscreenImage = true" />
+
                             <!-- PDF View -->
-                            <iframe *ngIf="isPdfFile()" [src]="selectedFileUrl" class="file-viewer"
-                                frameborder="0"></iframe>
+                            <iframe *ngIf="isPdfFile()" [src]="selectedFileUrl"
+                                style="width: 100%; height: 100%; min-height: 500px; border: none; border-radius: var(--radius-md);"
+                                class="file-viewer" frameborder="0"></iframe>
+
                             <!-- Unsupported view -->
                             <div *ngIf="!isImageFile() && !isPdfFile()" class="unsupported-file">
                                 Unsupported File Format to Preview.
-                                <br><br>
-                                <a [href]="rawFileUrl" target="_blank" class="btn-primary"
-                                    style="display:inline-block; text-decoration:none; margin-top: 16px;">Download/Open
-                                    File</a>
                             </div>
                         </ng-container>
                         <ng-template #noFile>
@@ -211,15 +234,56 @@
                                 selectedDocDetails.status }}</span>
                         </div>
 
-                        <div class="info-row" *ngIf="parseTags(selectedDocDetails.tags).length > 0"
+                        <div class="info-row"
+                            *ngIf="selectedDocDetails.parsedTags && selectedDocDetails.parsedTags.length > 0"
                             style="margin-top: 24px;">
                             <span class="info-label" style="display: block; margin-bottom: 8px;">Tags:</span>
                             <div class="tags-container">
-                                <span class="tag" *ngFor="let tag of parseTags(selectedDocDetails.tags)">{{ tag
+                                <span class="tag" *ngFor="let tag of selectedDocDetails.parsedTags">{{ tag
                                     }}</span>
                             </div>
                         </div>
+
+                        <div style="margin-top: auto; padding-top: 40px; border-top: 1px solid #E5E7EB; margin-top: 30px; text-align: center;"
+                            *ngIf="rawFileUrl">
+                            <a [href]="rawFileUrl" target="_blank" class="btn-primary"
+                                style="display: inline-block; text-decoration: none; padding: 12px 32px; font-size: 1rem;">
+                                Download Report
+                            </a>
+                        </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Image Overlay -->
+    <div class="fullscreen-overlay" *ngIf="isFullscreenImage" (click)="isFullscreenImage = false">
+        <button class="btn-close fullscreen-close" (click)="isFullscreenImage = false">&times;</button>
+        <img [src]="selectedFileUrl" class="fullscreen-image" (click)="$event.stopPropagation()" />
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" *ngIf="isDeleteModalOpen">
+        <div class="modal-card" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3>Confirm Deletion</h3>
+                <button class="btn-close" (click)="closeDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding-top: 10px;">
+                <p>Are you sure you want to delete <strong>{{ documentToDelete?.report_type || 'this document'
+                        }}</strong>? This action cannot be undone.</p>
+                <div class="api-error" *ngIf="deleteError" style="margin-top: 16px;">
+                    {{ deleteError }}
+                </div>
+                <div class="modal-actions" style="margin-top: 24px;">
+                    <button type="button" class="btn-secondary" (click)="closeDeleteModal()"
+                        [disabled]="isDeleting">Cancel</button>
+                    <button type="button" class="btn-primary btn-danger" (click)="confirmDelete()"
+                        [disabled]="isDeleting">
+                        <span *ngIf="!isDeleting">Delete Document</span>
+                        <span *ngIf="isDeleting" class="loader"></span>
+                    </button>
                 </div>
             </div>
         </div>

@@ -31,4 +31,8 @@ export class DocumentService {
   getFileUrl(fileId: string): Observable<any> {
     return this.http.get(`${API_CONSTANTS.BASE_URL}/files/${fileId}`);
   }
+
+  deleteDocument(id: string): Observable<any> {
+    return this.http.delete(`${API_CONSTANTS.DOCUMENTS_URL}/${id}`);
+  }
 }

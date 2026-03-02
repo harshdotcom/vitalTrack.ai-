@@ -184,14 +184,41 @@
     font-size: 0.75rem;
     padding: 4px 6px;
     border-radius: 4px;
+    font-weight: 500;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+.doc-badge-text {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: 500;
+    flex: 1;
+}
+
+.delete-icon {
+    font-size: 1rem;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: color var(--transition-fast), transform var(--transition-fast);
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-icon:hover {
+    color: #ffcccc;
+    transform: scale(1.1);
 }
 
 .more-badge {
     background-color: var(--secondary);
+    justify-content: center;
 }
 
 /* Empty State */
@@ -514,4 +541,52 @@ select {
         align-items: flex-start;
         gap: 6px;
     }
+}
+
+/* Fullscreen Image View */
+.clickable-image {
+    cursor: zoom-in;
+    transition: transform 0.2s ease;
+}
+
+.clickable-image:hover {
+    transform: scale(1.02);
+}
+
+.fullscreen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: zoom-out;
+    animation: fadeIn 0.2s ease;
+}
+
+.fullscreen-image {
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    cursor: default;
+    border-radius: 4px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.fullscreen-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 2.5rem;
+    z-index: 2010;
+    cursor: pointer;
+}
+
+.fullscreen-close:hover {
+    color: #F87171;
 }

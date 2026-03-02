@@ -210,6 +210,7 @@ export class CalendarDashboard implements OnInit {
 
   openUploadModal() {
     this.isUploadModalOpen = true;
+    document.body.style.overflow = 'hidden';
     this.uploadError = '';
     this.selectedFile = null;
     this.uploadForm.reset({
@@ -221,6 +222,7 @@ export class CalendarDashboard implements OnInit {
 
   closeUploadModal() {
     this.isUploadModalOpen = false;
+    document.body.style.overflow = '';
   }
 
   onFileSelected(event: any) {
@@ -290,24 +292,84 @@ export class CalendarDashboard implements OnInit {
     this.selectedDayDate = date;
     this.selectedDayDocuments = documents;
     this.isDayModalOpen = true;
+    document.body.style.overflow = 'hidden';
   }
 
   closeDayModal() {
     this.isDayModalOpen = false;
+    document.body.style.overflow = '';
     this.selectedDayDate = null;
     this.selectedDayDocuments = [];
   }
 
+  // --- Delete Modal Methods ---
+  isDeleteModalOpen = false;
+  documentToDelete: any = null;
+  isDeleting = false;
+  deleteError = '';
+
+  openDeleteModal(doc: any) {
+    this.documentToDelete = doc;
+    this.isDeleteModalOpen = true;
+    this.deleteError = '';
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeDeleteModal() {
+    this.isDeleteModalOpen = false;
+    this.documentToDelete = null;
+    this.isDeleting = false;
+    this.deleteError = '';
+    
+    // Only clear overflow if no other modals are stubbornly open
+    if (!this.isUploadModalOpen && !this.isDetailsModalOpen && !this.isDayModalOpen) {
+        document.body.style.overflow = '';
+    }
+  }
+
+  confirmDelete() {
+    if (!this.documentToDelete || !this.documentToDelete.id) return;
+    
+    this.isDeleting = true;
+    this.deleteError = '';
+
+    this.documentService.deleteDocument(this.documentToDelete.id).subscribe({
+      next: () => {
+        this.isDeleting = false;
+        this.closeDeleteModal();
+        // Since the data changed, force a clean refresh of the month
+        this.reportsMap = {};
+        this.generateCalendar();
+        this.fetchMonthData();
+        
+        // If the day modal was open, securely close it to prevent orphaned data
+        if (this.isDayModalOpen) {
+            this.closeDayModal();
+        }
+      },
+      error: (err) => {
+        console.error('Failed to delete document', err);
+        this.deleteError = 'Failed to delete the document. Please try again.';
+        this.isDeleting = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   detailsError: string = '';
+  isFullscreenImage: boolean = false;
+  pdfBlobUrl: string | null = null;
 
   // --- Details Modal Methods ---
   openDocumentDetails(docId: string) {
     this.isDetailsModalOpen = true;
+    document.body.style.overflow = 'hidden';
     this.isDetailsLoading = true;
     this.detailsError = '';
     this.selectedDocDetails = null;
     this.selectedFileUrl = null;
     this.rawFileUrl = '';
+    this.isFullscreenImage = false;
 
     if (!docId) {
       this.detailsError = 'Invalid document ID.';
@@ -328,7 +390,10 @@ export class CalendarDashboard implements OnInit {
             } catch(e) { console.warn('JSON string parse fail', e); }
           }
 
-          this.selectedDocDetails = docData;
+          this.selectedDocDetails = {
+            ...docData,
+            parsedTags: this.parseTags(docData.tags)
+          };
 
           if (docData && docData.file_id) {
             this.documentService.getFileUrl(docData.file_id).subscribe({
@@ -345,9 +410,35 @@ export class CalendarDashboard implements OnInit {
 
                   if (fileData && fileData.url) {
                     this.rawFileUrl = fileData.url;
-                    this.selectedFileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(fileData.url);
+                    
+                    if (this.isPdfFile()) {
+                      // Fetch the PDF directly and construct a Blob URL so the browser renders it inline
+                      // and bypasses S3's rigid Content-Disposition: attachment headers
+                      fetch(this.rawFileUrl)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+                            this.pdfBlobUrl = URL.createObjectURL(pdfBlob);
+                            this.selectedFileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfBlobUrl);
+                            this.isDetailsLoading = false;
+                            this.cdr.detectChanges();
+                        })
+                        .catch(e => {
+                            console.warn('CORS prevented inline PDF blob. Falling back to explicit Google Viewer Proxy.', e);
+                            const googleProxyUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(this.rawFileUrl)}&embedded=true`;
+                            this.selectedFileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(googleProxyUrl);
+                            this.isDetailsLoading = false;
+                            this.cdr.detectChanges();
+                        });
+                    } else {
+                      this.selectedFileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(fileData.url);
+                      this.isDetailsLoading = false;
+                      this.cdr.detectChanges();
+                    }
                   } else {
                     this.detailsError = 'No file URL returned from server.';
+                    this.isDetailsLoading = false;
+                    this.cdr.detectChanges();
                   }
                 } catch(e) {
                   this.detailsError = 'Failed to map file URL data.';
@@ -386,9 +477,17 @@ export class CalendarDashboard implements OnInit {
 
   closeDocumentDetails() {
     this.isDetailsModalOpen = false;
+    document.body.style.overflow = '';
     this.selectedDocDetails = null;
     this.selectedFileUrl = null;
     this.rawFileUrl = '';
+    this.isFullscreenImage = false;
+    
+    // Cleanup memory from our temporary blob URLs
+    if (this.pdfBlobUrl) {
+      URL.revokeObjectURL(this.pdfBlobUrl);
+      this.pdfBlobUrl = null;
+    }
   }
 
   isImageFile(): boolean {
