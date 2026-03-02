@@ -30,7 +30,7 @@
                     {{ currentMonthName }}
                     <span *ngIf="isLoading"
                         style="font-size: 0.875rem; color: var(--primary); font-weight: normal; margin-left: 8px;">Loading...</span>
-                    
+
                 </h2>
                 <div *ngIf="!isLoading && !hasReportsForCurrentMonth" class="empty-state-note">
                     No entries found this month.
@@ -55,10 +55,12 @@
                     <span class="date-number">{{ cell.date.getDate() }}</span>
 
                     <div class="documents-list">
-                        <div *ngFor="let doc of cell.documents | slice:0:3" class="doc-badge" [title]="doc.report_type">
+                        <div *ngFor="let doc of cell.documents | slice:0:3" class="doc-badge" [title]="doc.report_type"
+                            (click)="openDocumentDetails(doc.id); $event.stopPropagation()">
                             {{ doc.report_type }}
                         </div>
-                        <div *ngIf="cell.documents.length > 3" class="doc-badge more-badge">
+                        <div *ngIf="cell.documents.length > 3" class="doc-badge more-badge"
+                            (click)="openDayModal(cell.date, cell.documents); $event.stopPropagation()">
                             +{{ cell.documents.length - 3 }} more
                         </div>
                     </div>
@@ -128,6 +130,97 @@
                     </div>
 
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Day Documents Modal -->
+    <div class="modal-overlay" *ngIf="isDayModalOpen">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Documents for {{ selectedDayDate | date:'longDate' }}</h3>
+                <button class="btn-close" (click)="closeDayModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 8px;">
+                <div *ngFor="let doc of selectedDayDocuments" class="doc-badge"
+                    style="cursor: pointer; padding: 12px; display: block; text-align: center; font-size: 1rem;"
+                    (click)="openDocumentDetails(doc.id); closeDayModal()">
+                    {{ doc.report_type }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Details Modal (Side by Side) -->
+    <div class="modal-overlay" *ngIf="isDetailsModalOpen">
+        <div class="modal-card details-card">
+            <div class="modal-header">
+                <h3>Document Details</h3>
+                <button class="btn-close" (click)="closeDocumentDetails()">&times;</button>
+            </div>
+
+            <div class="modal-body details-body">
+                <div class="details-loading" *ngIf="isDetailsLoading">
+                    <span class="loader"></span> Loading details...
+                </div>
+
+                <div class="api-error" *ngIf="detailsError" style="margin: 32px;">
+                    {{ detailsError }}
+                </div>
+
+                <div class="details-content" *ngIf="!isDetailsLoading && !detailsError && selectedDocDetails">
+                    <!-- Left: Viewer -->
+                    <div class="viewer-section">
+                        <ng-container *ngIf="selectedFileUrl; else noFile">
+                            <!-- Image View -->
+                            <img *ngIf="isImageFile()" [src]="selectedFileUrl" alt="Medical Report"
+                                class="file-viewer" />
+                            <!-- PDF View -->
+                            <iframe *ngIf="isPdfFile()" [src]="selectedFileUrl" class="file-viewer"
+                                frameborder="0"></iframe>
+                            <!-- Unsupported view -->
+                            <div *ngIf="!isImageFile() && !isPdfFile()" class="unsupported-file">
+                                Unsupported File Format to Preview.
+                                <br><br>
+                                <a [href]="rawFileUrl" target="_blank" class="btn-primary"
+                                    style="display:inline-block; text-decoration:none; margin-top: 16px;">Download/Open
+                                    File</a>
+                            </div>
+                        </ng-container>
+                        <ng-template #noFile>
+                            <div class="unsupported-file">No File Available</div>
+                        </ng-template>
+                    </div>
+
+                    <!-- Right: Metadata -->
+                    <div class="info-section">
+                        <h4 style="margin-top: 0; margin-bottom: 24px; color: var(--text-main); font-size: 1.25rem;">{{
+                            selectedDocDetails.report_type }}</h4>
+
+                        <div class="info-row">
+                            <span class="info-label">Category:</span>
+                            <span class="info-value category-value">{{ selectedDocDetails.category }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Date Logged:</span>
+                            <span class="info-value">{{ selectedDocDetails.report_date | date:'mediumDate' }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value status-badge" [ngClass]="selectedDocDetails.status">{{
+                                selectedDocDetails.status }}</span>
+                        </div>
+
+                        <div class="info-row" *ngIf="parseTags(selectedDocDetails.tags).length > 0"
+                            style="margin-top: 24px;">
+                            <span class="info-label" style="display: block; margin-bottom: 8px;">Tags:</span>
+                            <div class="tags-container">
+                                <span class="tag" *ngFor="let tag of parseTags(selectedDocDetails.tags)">{{ tag
+                                    }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
