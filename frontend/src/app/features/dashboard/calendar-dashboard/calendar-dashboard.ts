@@ -302,6 +302,60 @@ export class CalendarDashboard implements OnInit {
     this.selectedDayDocuments = [];
   }
 
+  // --- Delete Modal Methods ---
+  isDeleteModalOpen = false;
+  documentToDelete: any = null;
+  isDeleting = false;
+  deleteError = '';
+
+  openDeleteModal(doc: any) {
+    this.documentToDelete = doc;
+    this.isDeleteModalOpen = true;
+    this.deleteError = '';
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeDeleteModal() {
+    this.isDeleteModalOpen = false;
+    this.documentToDelete = null;
+    this.isDeleting = false;
+    this.deleteError = '';
+    
+    // Only clear overflow if no other modals are stubbornly open
+    if (!this.isUploadModalOpen && !this.isDetailsModalOpen && !this.isDayModalOpen) {
+        document.body.style.overflow = '';
+    }
+  }
+
+  confirmDelete() {
+    if (!this.documentToDelete || !this.documentToDelete.id) return;
+    
+    this.isDeleting = true;
+    this.deleteError = '';
+
+    this.documentService.deleteDocument(this.documentToDelete.id).subscribe({
+      next: () => {
+        this.isDeleting = false;
+        this.closeDeleteModal();
+        // Since the data changed, force a clean refresh of the month
+        this.reportsMap = {};
+        this.generateCalendar();
+        this.fetchMonthData();
+        
+        // If the day modal was open, securely close it to prevent orphaned data
+        if (this.isDayModalOpen) {
+            this.closeDayModal();
+        }
+      },
+      error: (err) => {
+        console.error('Failed to delete document', err);
+        this.deleteError = 'Failed to delete the document. Please try again.';
+        this.isDeleting = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   detailsError: string = '';
   isFullscreenImage: boolean = false;
   pdfBlobUrl: string | null = null;

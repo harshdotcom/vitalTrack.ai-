@@ -184,14 +184,41 @@
     font-size: 0.75rem;
     padding: 4px 6px;
     border-radius: 4px;
+    font-weight: 500;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+.doc-badge-text {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: 500;
+    flex: 1;
+}
+
+.delete-icon {
+    font-size: 1rem;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: color var(--transition-fast), transform var(--transition-fast);
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-icon:hover {
+    color: #ffcccc;
+    transform: scale(1.1);
 }
 
 .more-badge {
     background-color: var(--secondary);
+    justify-content: center;
 }
 
 /* Empty State */

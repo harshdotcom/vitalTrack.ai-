@@ -111,6 +111,20 @@ button.btn-primary:active {
     box-shadow: 0 2px 4px rgba(13, 148, 136, 0.2);
 }
 
+.btn-primary.btn-danger {
+    background-color: var(--error);
+    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25);
+}
+
+.btn-primary.btn-danger:hover {
+    background-color: #DC2626;
+    box-shadow: 0 6px 8px rgba(239, 68, 68, 0.3);
+}
+
+.btn-primary.btn-danger:active {
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
 button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
