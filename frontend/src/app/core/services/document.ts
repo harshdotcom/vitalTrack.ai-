@@ -13,13 +13,22 @@ export class DocumentService {
     return this.http.post(API_CONSTANTS.DOCUMENTS_CALENDAR_URL, { month, year });
   }
 
-  uploadFile(file: File): Observable<any> {
+  uploadFile(file: File, fileType: string): Observable<any> {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('files', file);
+    formData.append('file_type', fileType);
     return this.http.post(API_CONSTANTS.FILES_UPLOAD_URL, formData);
   }
 
   submitDocument(details: any): Observable<any> {
     return this.http.post(API_CONSTANTS.DOCUMENTS_URL, details);
+  }
+
+  getDocumentDetails(id: string): Observable<any> {
+    return this.http.get(`${API_CONSTANTS.DOCUMENTS_URL}/${id}`);
+  }
+
+  getFileUrl(fileId: string): Observable<any> {
+    return this.http.get(`${API_CONSTANTS.BASE_URL}/files/${fileId}`);
   }
 }

@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -24,6 +25,7 @@ export class CalendarDashboard implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
+  private sanitizer = inject(DomSanitizer);
 
   currentDate = new Date();
   calendarGrid: CalendarDay[] = [];
@@ -33,6 +35,18 @@ export class CalendarDashboard implements OnInit {
   reportsMap: { [key: string]: any[] } = {};
 
   isLoading = true;
+
+  // Day Modal State (For "+X more" clicks)
+  isDayModalOpen = false;
+  selectedDayDate: Date | null = null;
+  selectedDayDocuments: any[] = [];
+
+  // Details Modal State
+  isDetailsModalOpen = false;
+  isDetailsLoading = false;
+  selectedDocDetails: any = null;
+  rawFileUrl = '';
+  selectedFileUrl: SafeResourceUrl | null = null;
 
   // Upload Modal State
   isUploadModalOpen = false;
@@ -229,7 +243,8 @@ export class CalendarDashboard implements OnInit {
     this.uploadError = '';
 
     // Step 1: Upload File
-    this.documentService.uploadFile(this.selectedFile).subscribe({
+    const fileType = this.uploadForm.get('file_type')?.value || 'lab_report';
+    this.documentService.uploadFile(this.selectedFile, fileType).subscribe({
       next: (uploadRes) => {
         if (uploadRes && uploadRes.files && uploadRes.files.length > 0) {
           const fileId = uploadRes.files[0].file_id;
@@ -268,5 +283,137 @@ export class CalendarDashboard implements OnInit {
         this.isUploading = false;
       }
     });
+  }
+
+  // --- Day Modal Methods ---
+  openDayModal(date: Date, documents: any[]) {
+    this.selectedDayDate = date;
+    this.selectedDayDocuments = documents;
+    this.isDayModalOpen = true;
+  }
+
+  closeDayModal() {
+    this.isDayModalOpen = false;
+    this.selectedDayDate = null;
+    this.selectedDayDocuments = [];
+  }
+
+  detailsError: string = '';
+
+  // --- Details Modal Methods ---
+  openDocumentDetails(docId: string) {
+    this.isDetailsModalOpen = true;
+    this.isDetailsLoading = true;
+    this.detailsError = '';
+    this.selectedDocDetails = null;
+    this.selectedFileUrl = null;
+    this.rawFileUrl = '';
+
+    if (!docId) {
+      this.detailsError = 'Invalid document ID.';
+      this.isDetailsLoading = false;
+      return;
+    }
+
+    this.documentService.getDocumentDetails(docId).subscribe({
+      next: (response) => {
+        try {
+          let docData = response;
+          // Unwind potential wrappers
+          if (response && response.data) docData = response.data;
+          else if (typeof response === 'string') {
+            try { 
+              const parsed = JSON.parse(response); 
+              docData = parsed.data || parsed; 
+            } catch(e) { console.warn('JSON string parse fail', e); }
+          }
+
+          this.selectedDocDetails = docData;
+
+          if (docData && docData.file_id) {
+            this.documentService.getFileUrl(docData.file_id).subscribe({
+              next: (fileRes) => {
+                try {
+                  let fileData = fileRes;
+                  if (fileRes && fileRes.data) fileData = fileRes.data;
+                  else if (typeof fileRes === 'string') {
+                    try { 
+                      const parsed = JSON.parse(fileRes); 
+                      fileData = parsed.data || parsed; 
+                    } catch(e) {}
+                  }
+
+                  if (fileData && fileData.url) {
+                    this.rawFileUrl = fileData.url;
+                    this.selectedFileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(fileData.url);
+                  } else {
+                    this.detailsError = 'No file URL returned from server.';
+                  }
+                } catch(e) {
+                  this.detailsError = 'Failed to map file URL data.';
+                } finally {
+                  this.isDetailsLoading = false;
+                  this.cdr.detectChanges();
+                }
+              },
+              error: (err) => {
+                console.error('File URL fetch error', err);
+                this.detailsError = 'Failed to load document file link.';
+                this.isDetailsLoading = false;
+                this.cdr.detectChanges();
+              }
+            });
+          } else {
+            // Missing file_id but doc exists
+            this.isDetailsLoading = false;
+            this.cdr.detectChanges();
+          }
+        } catch(e) {
+          console.error('Doc payload mapping error', e);
+          this.detailsError = 'Unexpected error rendering document.';
+          this.isDetailsLoading = false;
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        console.error('Doc details fetch error', err);
+        this.detailsError = 'Failed to load document information.';
+        this.isDetailsLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  closeDocumentDetails() {
+    this.isDetailsModalOpen = false;
+    this.selectedDocDetails = null;
+    this.selectedFileUrl = null;
+    this.rawFileUrl = '';
+  }
+
+  isImageFile(): boolean {
+    if (!this.rawFileUrl) return false;
+    const lowerUrl = this.rawFileUrl.toLowerCase();
+    const urlWithoutParams = lowerUrl.split('?')[0];
+    return urlWithoutParams.endsWith('.png') || urlWithoutParams.endsWith('.jpg') || urlWithoutParams.endsWith('.jpeg');
+  }
+
+  isPdfFile(): boolean {
+    if (!this.rawFileUrl) return false;
+    const lowerUrl = this.rawFileUrl.toLowerCase();
+    const urlWithoutParams = lowerUrl.split('?')[0];
+    return urlWithoutParams.endsWith('.pdf');
+  }
+
+  parseTags(tags: string | string[]): string[] {
+    if (!tags) return [];
+    if (Array.isArray(tags)) return tags;
+    try {
+      const parsed = JSON.parse(tags);
+      if (Array.isArray(parsed)) return parsed;
+      return [];
+    } catch (e) {
+      return [];
+    }
   }
 }
