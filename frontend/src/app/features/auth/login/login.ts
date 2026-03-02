@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
+import { ToastService } from '../../../core/services/toast';
 
 @Component({
   selector: 'app-login',
@@ -15,6 +16,8 @@ export class Login {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
+  private cdr = inject(ChangeDetectorRef);
 
   loginForm: FormGroup = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -39,11 +42,15 @@ export class Login {
         console.log('Login successful', response);
         this.router.navigate(['/dashboard']);
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Login Error:', err);
-        this.errorMessage = err.error?.message || 'Invalid email or password. Please try again.';
+        const errMsg = err.error?.message || 'Invalid email or password. Please try again.';
+        this.errorMessage = errMsg;
+        this.toastService.showError(errMsg);
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

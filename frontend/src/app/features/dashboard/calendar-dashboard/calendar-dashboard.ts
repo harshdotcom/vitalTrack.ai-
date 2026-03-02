@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DocumentService } from '../../../core/services/document';
+import { ToastService } from '../../../core/services/toast';
 import { AuthService } from '../../../core/services/auth';
 
 interface CalendarDay {
@@ -26,6 +27,7 @@ export class CalendarDashboard implements OnInit {
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
   private sanitizer = inject(DomSanitizer);
+  private toastService = inject(ToastService);
 
   currentDate = new Date();
   calendarGrid: CalendarDay[] = [];
@@ -145,6 +147,7 @@ export class CalendarDashboard implements OnInit {
       },
       error: (err) => {
         console.error('Error fetching calendar', err);
+        this.toastService.showError('Failed to load calendar data.');
         this.isLoading = false;
         this.generateCalendar();
         this.cdr.detectChanges();
@@ -269,7 +272,9 @@ export class CalendarDashboard implements OnInit {
             },
             error: (err) => {
               console.error('Submit Doc Error', err);
-              this.uploadError = 'Failed to save document details.';
+              const errMsg = err.error?.message || 'Failed to save document details.';
+              this.uploadError = errMsg;
+              this.toastService.showError(errMsg);
               this.isUploading = false;
             }
           });
@@ -281,7 +286,9 @@ export class CalendarDashboard implements OnInit {
       },
       error: (err) => {
         console.error('File Upload Error', err);
-        this.uploadError = 'Failed to upload the file.';
+        const errMsg = err.error?.message || 'Failed to upload the file.';
+        this.uploadError = errMsg;
+        this.toastService.showError(errMsg);
         this.isUploading = false;
       }
     });
@@ -349,7 +356,9 @@ export class CalendarDashboard implements OnInit {
       },
       error: (err) => {
         console.error('Failed to delete document', err);
-        this.deleteError = 'Failed to delete the document. Please try again.';
+        const errMsg = err.error?.message || 'Failed to delete the document. Please try again.';
+        this.deleteError = errMsg;
+        this.toastService.showError(errMsg);
         this.isDeleting = false;
         this.cdr.detectChanges();
       }
@@ -449,7 +458,9 @@ export class CalendarDashboard implements OnInit {
               },
               error: (err) => {
                 console.error('File URL fetch error', err);
-                this.detailsError = 'Failed to load document file link.';
+                const errMsg = err.error?.message || 'Failed to load document file link.';
+                this.detailsError = errMsg;
+                this.toastService.showError(errMsg);
                 this.isDetailsLoading = false;
                 this.cdr.detectChanges();
               }
