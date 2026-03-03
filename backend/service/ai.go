@@ -9,8 +9,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 )
 
-func AnalyzeMedicalReport(ocrText string) (string, error) {
-
+func AnalyzeMedicalReport(fileId string) (string, error) {
+	ocrText, err := GenerateOCRText(fileId)
+	if err != nil {
+		return "", err
+	}
 	ctx := context.Background()
 
 	// Load AWS config
