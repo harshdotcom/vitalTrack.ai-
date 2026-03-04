@@ -148,6 +148,23 @@ Response:
 }
 ```
 
+### GET /files/:id
+
+Request (Params):
+
+```
+id: 8044891e-e5cf-44fc-bdc4-2b3e8f7efcfb
+
+```
+
+Response:
+
+```json
+{
+    "url": "https://vitatrack-documents-dev.s3.ap-south-1.amazonaws.com/ba4dcca3-05d9-410e-8122-a9783668bce0.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Checksum-Mode=ENABLED&X-Amz-Credential=AKIAWLX2NNJXXXTUF5PS%2F20260304%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20260304T205954Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&x-id=GetObject&X-Amz-Signature=71a4d3d723eb10526f18aafe626197da12e9ad7c06c99d0178d387b00033c43e"
+}
+```
+
 ---
 
 ### POST /file/get-document-list [Needs to done]
@@ -180,52 +197,54 @@ Response:
 
 ---
 
-### POST /file/get-document-details
+### GET /documents/:documentId
 
-Request:
+Request (Params):
 
-```json
-{
-  "userId": "USER_ID",
-  "documentId": "DOC_ID"
-}
+```
+id: 0e23fd6b-f6ad-42b4-a676-3682ab20b8cf
+
 ```
 
 Response:
 
 ```json
 {
-  "success": true,
-  "data": {
-    "documentId": "DOC_ID",
-    "title": "Blood Report",
-    "fileUrl": "storage/url/report.pdf",
-    "documentType": "Blood Test",
-    "uploadedAt": "2026-02-25"
-  }
+    "id": "0e23fd6b-f6ad-42b4-a676-3682ab20b8cf",
+    "user_id": 36,
+    "file_id": "7d94725a-cba7-46f9-b04c-2fe7bf7f56bb",
+    "category": "misc",
+    "report_type": "nothing",
+    "file_type": "pdf",
+    "tags": "[\"no tag\"]",
+    "status": "uploaded",
+    "report_date": "2026-02-25T05:30:00+05:30"
 }
 ```
 
 ---
 
-### POST /file/update-document
+### POST /documents
 
 Request:
 
 ```json
-{
-  "documentId": "DOC_ID",
-  "title": "Blood Report Feb",
-  "tags": ["blood", "routine"]
-}
+   {
+        "file_id":"7d94725a-cba7-46f9-b04c-2fe7bf7f56bb",
+        "category": "misc",
+        "report_type":"nothing",
+        "file_type":"pdf",
+        "tags": ["no tag"],
+        "report_date": "2026-02-25"
+    }
 ```
 
 Response:
 
 ```json
 {
-  "success": true,
-  "message": "Document updated"
+    "document_id": "0e23fd6b-f6ad-42b4-a676-3682ab20b8cf",
+    "status": "uploaded"
 }
 ```
 
