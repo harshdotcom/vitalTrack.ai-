@@ -16,8 +16,6 @@ Request:
   "fullName": "Harsh Jha",
   "email": "harsh@email.com",
   "password": "StrongPassword123",
-  "age": 28,
-  "gender": "Male"
 }
 ```
 
@@ -25,11 +23,18 @@ Response:
 
 ```json
 {
-  "success": true,
-  "message": "User created successfully",
-  "data": {
-    "userId": "USER_ID"
-  }
+    "users": {
+        "user_id": 39,
+        "email": "john@gmail.com",
+        "password": "$2a$12$wH6JBdlTpvmj67kzOu867O8H41r7Kc1CUoW5FyzphYZQn5GZPI3uq",
+        "GoogleId": null,
+        "name": "John Doe",
+        "age": null,
+        "gender": "",
+        "profile_pic": null,
+        "CreatedAt": "2026-03-05T02:16:08.562392+05:30",
+        "UpdatedAt": "2026-03-05T02:16:08.562392+05:30"
+    }
 }
 ```
 
@@ -41,8 +46,8 @@ Request:
 
 ```json
 {
-  "email": "harsh@email.com",
-  "password": "StrongPassword123"
+    "email": "mikasa@gmail.com",
+    "password": "123456789"
 }
 ```
 
@@ -50,18 +55,26 @@ Response:
 
 ```json
 {
-  "success": true,
-  "data": {
-    "token": "JWT_TOKEN",
-    "userId": "USER_ID",
-    "loginType": "EMAIL"
-  }
+    "message": "Successfully login",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1pa2FzYUBnbWFpbC5jb20iLCJleHAiOjE3NzI2NjE2MzgsInVzZXJJZCI6MzZ9.R1M7xjJGezETqKNvQPKBLn5wZ3ejFLCLFXbuzpieh1Y",
+    "user": {
+        "user_id": 36,
+        "email": "mikasa@gmail.com",
+        "password": "$2a$12$eTDWJf3e44Qa9cjcAk18Q.ca2oSEOu/3oArO0M9bzzWuYd3U1tSNK",
+        "GoogleId": null,
+        "name": "Mikasa Ackerman",
+        "age": null,
+        "gender": "",
+        "profile_pic": null,
+        "CreatedAt": "2026-03-02T15:50:12.765834+05:30",
+        "UpdatedAt": "2026-03-02T15:50:12.765834+05:30"
+    }
 }
 ```
 
 ---
 
-### POST /auth/google-login
+### POST /auth/google-login [Needs to be done]
 
 Request:
 
@@ -86,7 +99,7 @@ Response:
 
 ---
 
-### POST /auth/update-user
+### POST /auth/update-user [Needs to be done]
 
 Request:
 
@@ -113,32 +126,31 @@ Response:
 
 ## FILE / DOCUMENT APIs
 
-### POST /file/upload
+### POST /files/upload
 
 Request (FormData):
 
 ```
-file: report.pdf
-userId: USER_ID
-documentType: Blood Test
-date: 2026-02-25
+files: report.pdf
+
 ```
 
 Response:
 
 ```json
 {
-  "success": true,
-  "data": {
-    "documentId": "DOC_ID",
-    "fileUrl": "storage/url/report.pdf"
-  }
+    "files": [
+        {
+            "file_id": "a000c1d5-5bc7-40e2-8d32-962a99127832",
+            "original_name": "Screenshot_22.png"
+        }
+    ]
 }
 ```
 
 ---
 
-### POST /file/get-document-list
+### POST /file/get-document-list [Needs to done]
 
 Request:
 
