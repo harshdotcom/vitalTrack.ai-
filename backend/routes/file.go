@@ -57,9 +57,6 @@ func getFileAnalysis(c *gin.Context) {
 		return
 	}
 
-	// respBody := []byte(jsonText)
-	// report, err := utility.ParseResponse(respBody)
-
 	c.JSON(http.StatusOK, gin.H{
 		"json": jsonText,
 	})
