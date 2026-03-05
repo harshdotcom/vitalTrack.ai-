@@ -16,7 +16,7 @@ func AnalyzeMedicalReport(fileId string) (*models.MedicalReport, error) {
 	reportDb, err := repository.GetMedicalReportByID(fileId)
 
 	if reportDb != nil {
-		report, err := models.GetMedicalReportFromDB(reportDb)
+		report, err := models.GetMedicalReportApiFormat(reportDb)
 		return report, err
 	}
 

@@ -48,7 +48,7 @@ func GetMedicalReportDBFormat(report *MedicalReport, fileId string) *MedicalRepo
 	return &dbReport
 }
 
-func GetMedicalReportFromDB(dbReport *MedicalReportDB) (*MedicalReport, error) {
+func GetMedicalReportApiFormat(dbReport *MedicalReportDB) (*MedicalReport, error) {
 	var metadata ReportMetadata
 	var metrics []Metric
 	var abnormal []string
