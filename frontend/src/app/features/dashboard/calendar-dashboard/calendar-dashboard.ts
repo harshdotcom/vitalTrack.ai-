@@ -404,8 +404,8 @@ export class CalendarDashboard implements OnInit {
             parsedTags: this.parseTags(docData.tags)
           };
 
-          if (docData && docData.file_id) {
-            this.documentService.getFileUrl(docData.file_id).subscribe({
+          if (docData && docData.id) {
+            this.documentService.getFileUrl(docData.id).subscribe({
               next: (fileRes) => {
                 try {
                   let fileData = fileRes;
