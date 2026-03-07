@@ -1,5 +1,7 @@
+import { environment } from '../../../environments/environment';
+
 export const API_CONSTANTS = {
-  BASE_URL: 'http://localhost:8081/api/v1',
+  BASE_URL: environment.apiUrl,
   get LOGIN_URL() {
     return `${this.BASE_URL}/users/login`;
   },

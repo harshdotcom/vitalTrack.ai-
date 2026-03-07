@@ -28,9 +28,7 @@ func main() {
 	// CORS CONFIGURATION
 	// =========================
 	server.Use(cors.New(cors.Config{
-		AllowOrigins: []string{
-			"http://localhost:4200", // Angular frontend
-		},
+		AllowAllOrigins: true,
 		AllowMethods: []string{
 			"GET",
 			"POST",
