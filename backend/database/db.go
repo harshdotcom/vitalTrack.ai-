@@ -12,13 +12,13 @@ var DB *gorm.DB
 var err error
 
 func generateDSN() string {
-	const dbtype string = "postgres"
-	const username string = "postgres"
-	const password string = "0000"
-	const dbhost string = "localhost"
+	// var dbtype string = os.Getenv("DB_TYPE")
+	var username string = os.Getenv("DB_USER")
+	var password string = os.Getenv("DB_PASSWORD")
+	var dbhost string = os.Getenv("DB_HOST")
 	var port string = os.Getenv("DB_PORT")
-	const dbname string = "vitadb"
-	const security string = "sslmode=disable"
+	var dbname string = os.Getenv("DB_NAME")
+	const security string = "sslmode=require"
 	var dsn string = "host=" + dbhost + " user=" + username + " password=" + password + " dbname=" + dbname + " port=" + port + " " + security
 	return dsn
 }
