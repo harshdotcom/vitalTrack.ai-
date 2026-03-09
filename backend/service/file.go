@@ -72,6 +72,8 @@ func UploadFiles(c *gin.Context) {
 			return
 		}
 
+		userID := c.MustGet("user_id").(int64)
+
 		// create DB model
 		fileModel := models.File{
 			OriginalName: file.Filename,
@@ -79,6 +81,7 @@ func UploadFiles(c *gin.Context) {
 			S3Key:        storedName, // ✔ correct S3 key
 			FileSize:     file.Size,
 			MimeType:     file.Header.Get("Content-Type"),
+			UploadedBy:   userID,
 		}
 
 		// save metadata to DB
