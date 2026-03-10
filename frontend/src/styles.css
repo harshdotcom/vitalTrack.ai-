@@ -42,12 +42,46 @@
 }
 
 body {
-    background-color: var(--bg-color);
+    /* Animated Premium Gradient Background */
+    background: linear-gradient(-45deg, #E0EFE5, #BCE4DB, #E0EFE5, #9CE0D3);
+    background-size: 300% 300%;
+    animation: gradientBG 15s ease infinite;
     color: var(--text-main);
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Global Animations for depth */
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-20px) scale(1.05);
+    }
+
+    100% {
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* Base Input & Form Styles */

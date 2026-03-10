@@ -28,6 +28,11 @@ export class Signup {
 
   isLoading = false;
   errorMessage = '';
+  showPassword = false;
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 
   onSubmit() {
     if (this.signupForm.invalid) {

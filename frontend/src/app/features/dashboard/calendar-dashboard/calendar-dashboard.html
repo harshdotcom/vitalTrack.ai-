@@ -33,7 +33,7 @@
 
                 </h2>
                 <div *ngIf="!isLoading && !hasReportsForCurrentMonth" class="empty-state-note">
-                    No entries found this month.
+                    No entries found.
                 </div>
             </div>
             <div class="calendar-nav">
@@ -51,9 +51,11 @@
 
             <div class="calendar-body">
                 <div class="calendar-cell" *ngFor="let cell of calendarGrid"
-                    [class.not-current-month]="!cell.isCurrentMonth" [class.has-reports]="cell.documents.length > 0">
+                    [class.not-current-month]="!cell.isCurrentMonth" [class.has-reports]="cell.documents.length > 0"
+                    (click)="cell.documents.length > 0 ? openDayModal(cell.date, cell.documents) : null">
                     <span class="date-number">{{ cell.date.getDate() }}</span>
 
+                    <!-- Desktop Document List -->
                     <div class="documents-list">
                         <div *ngFor="let doc of cell.documents | slice:0:3" class="doc-badge" [title]="doc.report_type"
                             (click)="openDocumentDetails(doc.id); $event.stopPropagation()">
@@ -76,6 +78,11 @@
                             (click)="openDayModal(cell.date, cell.documents); $event.stopPropagation()">
                             +{{ cell.documents.length - 3 }} more
                         </div>
+                    </div>
+
+                    <!-- Mobile Indicator -->
+                    <div class="mobile-indicator" *ngIf="cell.documents.length > 0">
+                        {{ cell.documents.length }} doc{{ cell.documents.length > 1 ? 's' : '' }}
                     </div>
                 </div>
             </div>

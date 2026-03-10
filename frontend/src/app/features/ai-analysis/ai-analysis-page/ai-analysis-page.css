@@ -3,6 +3,8 @@
     background-color: var(--bg-color);
     display: flex;
     flex-direction: column;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 /* ==================== HEADER ==================== */
@@ -270,33 +272,51 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
+    min-width: 0;
 }
 
 .col-right {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    min-width: 0;
 }
 
 /* ==================== CARDS ==================== */
 .card {
-    background: var(--surface-color);
+    /* Glassmorphism Effect */
+    background-color: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
+    box-shadow:
+        0 8px 32px rgba(13, 148, 136, 0.10),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
     padding: 28px;
-    border: 1px solid var(--border-color);
-    animation: slideUp 0.4s ease both;
+    animation: slideUpGlass 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
-@keyframes slideUp {
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 12px 40px rgba(13, 148, 136, 0.15),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes slideUpGlass {
     from {
         opacity: 0;
-        transform: translateY(16px);
+        transform: translateY(30px) scale(0.98);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -645,29 +665,100 @@
 
 @media (max-width: 600px) {
     .risk-hero {
-        padding: 28px 20px;
+        padding: 24px 16px;
     }
 
     .risk-hero-inner {
         flex-direction: column;
         text-align: center;
+        gap: 24px;
+    }
+
+    .risk-level-value {
+        font-size: 2.2rem;
     }
 
     .risk-stats {
         width: 100%;
-        justify-content: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        gap: 12px;
+    }
+
+    .risk-stat-number {
+        font-size: 1.5rem;
     }
 
     .analysis-grid {
         padding: 0 16px 32px;
         margin: 20px auto;
+        gap: 20px;
     }
 
     .col-right {
         grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .col-left {
+        gap: 16px;
+    }
+
+    .card {
+        padding: 20px 16px;
     }
 
     .analysis-header {
-        padding: 12px 16px;
+        padding: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        position: relative;
+    }
+
+    .header-logo {
+        position: absolute;
+        top: 22px;
+        right: 16px;
+        font-size: 0.85rem;
+    }
+
+    .logo-icon {
+        width: 22px;
+        height: 22px;
+        font-size: 0.85rem;
+    }
+
+    .header-center {
+        width: 100%;
+        align-items: flex-start;
+        text-align: left;
+        padding-right: 20px;
+    }
+
+    .header-center h1 {
+        text-align: left;
+        font-size: 1.15rem;
+        word-break: break-word;
+    }
+
+    .btn-back {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    .metrics-table th,
+    .metrics-table td {
+        padding: 10px 8px;
+        font-size: 0.75rem;
+    }
+
+    .metrics-table th {
+        font-size: 0.65rem;
+    }
+
+    .status-badge {
+        padding: 3px 6px;
+        font-size: 0.65rem;
     }
 }

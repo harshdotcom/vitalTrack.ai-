@@ -26,6 +26,11 @@ export class Login {
 
   isLoading = false;
   errorMessage = '';
+  showPassword = false;
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 
   onSubmit() {
     if (this.loginForm.invalid) {
