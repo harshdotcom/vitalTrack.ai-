@@ -18,7 +18,7 @@ func generateDSN() string {
 	var dbhost string = os.Getenv("DB_HOST")
 	var port string = os.Getenv("DB_PORT")
 	var dbname string = os.Getenv("DB_NAME")
-	const security string = "sslmode=require"
+	var security string = os.Getenv("DB_SECURITY")
 	var dsn string = "host=" + dbhost + " user=" + username + " password=" + password + " dbname=" + dbname + " port=" + port + " " + security
 	return dsn
 }

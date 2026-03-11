@@ -5,6 +5,7 @@ import "time"
 type Document struct {
 	// ID         string    `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	UserID     int64     `json:"user_id"`
+	File       File      `gorm:"foreignKey:FileID;references:ID;constraint:OnDelete:CASCADE"`
 	FileID     string    `json:"id" gorm:"column:id;primaryKey"`
 	Category   string    `json:"category"`
 	ReportType string    `json:"report_type"`

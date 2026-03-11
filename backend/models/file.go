@@ -9,6 +9,7 @@ type File struct {
 	S3Key        string
 	FileSize     int64
 	MimeType     string
-	UploadedBy   string
+	UploadedBy   int64
+	User         User `gorm:"foreignKey:UploadedBy;references:UserId;constraint:OnDelete:CASCADE"`
 	CreatedAt    time.Time
 }

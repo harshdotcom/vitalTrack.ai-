@@ -37,6 +37,7 @@ func registerFileRoutes(rg *gin.RouterGroup) {
 		files.GET("/:id", getFile)
 		files.GET("/ocr/:id", getFileText)
 		files.GET("/ai/:id", getFileAnalysis)
+		files.DELETE("/:id", deleteFile)
 	}
 }
 

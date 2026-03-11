@@ -62,3 +62,7 @@ func getFileAnalysis(c *gin.Context) {
 	})
 
 }
+
+func deleteFile(c *gin.Context) {
+	service.DeleteFile(c)
+}

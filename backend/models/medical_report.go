@@ -17,7 +17,8 @@ type MedicalReport struct {
 }
 
 type MedicalReportDB struct {
-	ID                  string         `gorm:"primaryKey"`
+	FileID              string         `json:"id" gorm:"column:id;primaryKey"`
+	File                File           `gorm:"foreignKey:FileID;references:ID;constraint:OnDelete:CASCADE"`
 	ReportMetadata      datatypes.JSON `gorm:"type:jsonb"`
 	Metrics             datatypes.JSON `gorm:"type:jsonb"`
 	AbnormalFindings    datatypes.JSON `gorm:"type:jsonb"`
@@ -35,7 +36,7 @@ func GetMedicalReportDBFormat(report *MedicalReport, fileId string) *MedicalRepo
 	follow, _ := json.Marshal(report.FollowUpSuggestions)
 
 	dbReport := MedicalReportDB{
-		ID:                  fileId,
+		FileID:              fileId,
 		ReportMetadata:      metadata,
 		Metrics:             metrics,
 		AbnormalFindings:    abnormal,
