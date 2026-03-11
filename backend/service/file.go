@@ -201,8 +201,17 @@ func DeleteFile(c *gin.Context) {
 
 	id := c.Param("id")
 	userID := c.MustGet("user_id").(int64)
+	err := DeleteFileFromS3(id)
 
-	err := repository.DeleteFile(id, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Unable to delete from S3 bucket",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	err = repository.DeleteFile(id, userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "file not found",
