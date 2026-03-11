@@ -46,6 +46,6 @@ func GetS3Key(fileId string) (string, error) {
 func DeleteFile(id string, userID int64) error {
 
 	return database.DB.
-		Where("id = ? AND user_id = ?", id, userID).
+		Where("id = ? AND uploaded_by = ?", id, userID).
 		Delete(&models.File{}).Error
 }

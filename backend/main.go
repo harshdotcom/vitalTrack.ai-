@@ -3,9 +3,9 @@ package main
 import (
 	"time"
 
-	"vita-track-ai/config"
 	"vita-track-ai/database"
 	"vita-track-ai/routes"
+	"vita-track-ai/service"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,7 @@ func main() {
 
 	// Init DB & S3
 	database.Init()
-	config.InitS3()
+	service.InitS3()
 
 	// Create server
 	server := gin.Default()
