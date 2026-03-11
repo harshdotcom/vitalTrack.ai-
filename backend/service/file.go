@@ -20,6 +20,8 @@ import (
 	"github.com/google/uuid"
 )
 
+var MAX_ALLOWED_SIZE int64 = 5242880
+
 func UploadFiles(c *gin.Context) {
 
 	form, err := c.MultipartForm()
@@ -57,6 +59,13 @@ func UploadFiles(c *gin.Context) {
 		if !allowed[ext] {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": "invalid file type: " + file.Filename,
+			})
+			return
+		}
+
+		if file.Size > MAX_ALLOWED_SIZE {
+			c.JSON(413, gin.H{
+				"error": "File size should not be more than 5MB " + file.Filename,
 			})
 			return
 		}
