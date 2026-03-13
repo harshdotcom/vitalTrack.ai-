@@ -3,21 +3,24 @@ package routes
 import (
 	"database/sql"
 	"errors"
+	"mime/multipart"
 	"net/http"
 	"time"
 	"vita-track-ai/models"
 	"vita-track-ai/repository"
+	"vita-track-ai/service"
 	"vita-track-ai/utility"
 
 	"github.com/gin-gonic/gin"
 )
 
 type SignupRequest struct {
-	Email    string     `form:"email" binding:"required,email"`
-	Password string     `form:"password" binding:"required,min=8"`
-	Name     string     `form:"name" binding:"required"`
-	DOB      *time.Time `form:"dob" time_format:"2006-01-02"`
-	Gender   *string    `form:"gender"`
+	Email      string                `form:"email" binding:"required,email"`
+	Password   string                `form:"password" binding:"required,min=8"`
+	Name       string                `form:"name" binding:"required"`
+	DOB        *time.Time            `form:"dob" time_format:"2006-01-02"`
+	Gender     *string               `form:"gender"`
+	ProfilePic *multipart.FileHeader `form:"profile_pic"`
 }
 
 type LoginRequest struct {
@@ -47,6 +50,7 @@ func signup(context *gin.Context) {
 	user.Name = signupRequest.Name
 	user.DOB = signupRequest.DOB
 	user.Gender = signupRequest.Gender
+	fileHeader := signupRequest.ProfilePic
 
 	_, err = repository.GetUserModelByEmail(user.Email)
 
@@ -56,6 +60,19 @@ func signup(context *gin.Context) {
 			"error":   errors.New("User Already Exists").Error(),
 		})
 		return
+	}
+
+	if fileHeader != nil {
+		storageKey, err := service.UploadProfilePicToS3(fileHeader, user.Email)
+
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Failed to upload profile picture",
+				"error":   err.Error(),
+			})
+			return
+		}
+		user.ProfilePic = &storageKey
 	}
 
 	err = repository.SaveUser(&user)

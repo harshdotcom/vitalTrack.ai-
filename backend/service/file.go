@@ -48,8 +48,6 @@ func UploadFiles(c *gin.Context) {
 
 	var response []gin.H
 
-	bucket := os.Getenv("AWS_BUCKET_NAME")
-
 	for _, file := range files {
 
 		// normalize extension
@@ -90,7 +88,7 @@ func UploadFiles(c *gin.Context) {
 		storedName := uuid.New().String() + ext
 
 		// upload file to S3
-		if err := UploadToS3(file, storedName, bucket); err != nil {
+		if err := UploadToS3(file, storedName, os.Getenv("AWS_BUCKET_NAME")); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "failed to upload to s3",
 			})

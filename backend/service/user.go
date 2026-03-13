@@ -1,6 +1,10 @@
 package service
 
-import "vita-track-ai/repository"
+import (
+	"mime/multipart"
+	"os"
+	"vita-track-ai/repository"
+)
 
 var MAX_ALLOWED_USER_STORAGE int64 = 104857600 //100MB in bytes
 
@@ -17,4 +21,12 @@ func exceedStorageLimit(userId int64, fileSize int64) (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
+
+func UploadProfilePicToS3(fileHeader *multipart.FileHeader, email string) (string, error) {
+	storageKey := "profile-pics-" + email
+	err := UploadToS3(fileHeader, storageKey, os.Getenv("AWS_BUCKET_NAME"))
+
+	return storageKey, err
+
 }
