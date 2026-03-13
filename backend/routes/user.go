@@ -203,3 +203,19 @@ func googleLogin(context *gin.Context) {
 	})
 
 }
+
+func getUserUsage(c *gin.Context) {
+	userID := c.MustGet("user_id").(int64)
+	userUsage, err := repository.GetCurrentStorageUsed(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Some problem with fetching user storage usage",
+			"error":   err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User storage usage fetched successfully",
+		"data":    userUsage,
+	})
+}

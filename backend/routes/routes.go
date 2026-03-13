@@ -19,6 +19,7 @@ func RegisterRoutes(server *gin.Engine) {
 
 	registerFileRoutes(protected)
 	registerDocumentRoutes(protected)
+	registerUserDetailRoutes(protected)
 }
 
 func registerUserRoutes(rg *gin.RouterGroup) {
@@ -50,4 +51,12 @@ func registerDocumentRoutes(rg *gin.RouterGroup) {
 		documents.DELETE("/:id", deleteDocument)
 		documents.POST("/calendar", getCalendarDocuments)
 	}
+}
+
+func registerUserDetailRoutes(rg *gin.RouterGroup) {
+	userDetails := rg.Group("/user-details")
+	{
+		userDetails.GET("/usage", getUserUsage)
+	}
+
 }
