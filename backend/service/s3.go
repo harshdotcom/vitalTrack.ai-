@@ -6,7 +6,6 @@ import (
 	"mime/multipart"
 	"os"
 	"time"
-	"vita-track-ai/repository"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -60,12 +59,9 @@ func UploadToS3(file *multipart.FileHeader, key string, bucket string) error {
 	return err
 }
 
-func DeleteFileFromS3(id string) error {
-	storageKey, err := repository.GetS3Key(id)
-	if err != nil {
-		return err
-	}
-	_, err = S3Client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+func DeleteFileFromS3(storageKey string) error {
+
+	_, err := S3Client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
 		Bucket: aws.String(os.Getenv("AWS_BUCKET_NAME")),
 		Key:    aws.String(storageKey),
 	})

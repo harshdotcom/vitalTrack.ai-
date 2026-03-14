@@ -34,6 +34,27 @@ func Init() {
 	createTables()
 }
 
+func ReadSQLFile(path string) (string, error) {
+	b, err := os.ReadFile(filepath.Clean(path))
+	if err != nil {
+		return "", err
+	}
+
+	query := string(b)
+
+	return query, nil
+}
+
+func RunSQLFile(path string) error {
+	query, err := ReadSQLFile(path)
+
+	if err != nil {
+		return err
+	}
+
+	return DB.WithContext(context.Background()).Exec(query).Error
+}
+
 func createTables() {
 	createUserTable()
 	createFileTable()
@@ -71,14 +92,12 @@ func createMedicalRecordTable() {
 	}
 }
 
-func runSQLFile(path string) error {
-	b, err := os.ReadFile(filepath.Clean(path))
+func createUserStorageMV() error {
+
+	query, err := ReadSQLFile("sql/USER_STORAGE.sql")
 	if err != nil {
 		return err
 	}
-	return DB.WithContext(context.Background()).Exec(string(b)).Error
-}
 
-func createUserStorageMV() error {
-	return runSQLFile("sql/USER_STORAGE.sql")
+	return DB.WithContext(context.Background()).Exec(query).Error
 }

@@ -222,7 +222,17 @@ func DeleteFile(c *gin.Context) {
 
 	id := c.Param("id")
 	userID := c.MustGet("user_id").(int64)
-	err := DeleteFileFromS3(id)
+	storageKey, err := repository.GetS3Key(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Unable to get S3 key from DB",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	err = DeleteFileFromS3(storageKey)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

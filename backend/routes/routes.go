@@ -57,6 +57,7 @@ func registerUserDetailRoutes(rg *gin.RouterGroup) {
 	userDetails := rg.Group("/user-details")
 	{
 		userDetails.GET("/usage", getUserUsage)
+		userDetails.PATCH("/update", updateProfile)
 	}
 
 }

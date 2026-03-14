@@ -587,7 +587,7 @@ Response:
 ```
 ---
 
-## GET User Details API
+## User Details API
 
 ### GET /user-details/usage
 
@@ -600,6 +600,40 @@ Response:
         "TotalStorageUsed": 321344
     },
     "message": "User storage usage fetched successfully"
+}
+```
+
+### PATCH /user-details/update
+
+Request:
+
+```json
+   {
+    "name": "Ereh Yaegar",
+    "dob": "2000-11-24",
+    "profile_pic": "file",
+    "gender": "Female",
+    "delete_profile_pic": "false"
+    }
+```
+
+Response:
+
+```json
+{
+    "message": "Update successful",
+    "user": {
+        "user_id": 4,
+        "email": "eren@gmail.com",
+        "password": "$2a$12$XhgVWOwypzvYE1gz6CtAAeorysihE7Uzg9t0JExx16t/EDs2Luhlq",
+        "GoogleId": null,
+        "name": "Ereh Yaegar",
+        "dob": "2000-11-24T00:00:00+05:30",
+        "gender": "Male",
+        "profile_pic": null,
+        "CreatedAt": "2026-03-14T02:38:17.781541+05:30",
+        "UpdatedAt": "2026-03-14T02:38:17.781541+05:30"
+    }
 }
 ```
 ---

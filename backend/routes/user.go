@@ -3,9 +3,7 @@ package routes
 import (
 	"database/sql"
 	"errors"
-	"mime/multipart"
 	"net/http"
-	"time"
 	"vita-track-ai/models"
 	"vita-track-ai/repository"
 	"vita-track-ai/service"
@@ -14,26 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type SignupRequest struct {
-	Email      string                `form:"email" binding:"required,email"`
-	Password   string                `form:"password" binding:"required,min=8"`
-	Name       string                `form:"name" binding:"required"`
-	DOB        *time.Time            `form:"dob" time_format:"2006-01-02"`
-	Gender     *string               `form:"gender"`
-	ProfilePic *multipart.FileHeader `form:"profile_pic"`
-}
-
-type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-}
-
-type GoogleLoginRequest struct {
-	Token string `json:"token" binding:"required"`
-}
-
 func signup(context *gin.Context) {
-	var signupRequest SignupRequest
+	var signupRequest models.SignupRequest
 	err := context.ShouldBind(&signupRequest) //not with JSON as it will be a form data :)
 
 	if err != nil {
@@ -90,7 +70,7 @@ func signup(context *gin.Context) {
 
 func login(context *gin.Context) {
 
-	var loginRequest LoginRequest
+	var loginRequest models.LoginRequest
 	err := context.ShouldBindBodyWithJSON(&loginRequest)
 
 	if err != nil {
@@ -136,7 +116,7 @@ func login(context *gin.Context) {
 }
 
 func googleLogin(context *gin.Context) {
-	var req GoogleLoginRequest
+	var req models.GoogleLoginRequest
 	err := context.ShouldBindJSON(&req)
 
 	if err != nil {
@@ -240,4 +220,47 @@ func getUserUsage(c *gin.Context) {
 		"message": "User storage usage fetched successfully",
 		"data":    userUsage,
 	})
+}
+
+func updateProfile(context *gin.Context) {
+
+	var updateUserReq models.UpdateUserRequest
+	err := context.ShouldBind(&updateUserReq)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Unable to pass the values into the updateProfile",
+			"error":   err.Error(),
+		})
+
+		return
+	}
+
+	userID := context.MustGet("user_id").(int64)
+
+	userModel, err := service.ManageUserUpdateRequest(updateUserReq, userID)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "There is a problem in updating the user",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	err = repository.UpdateUser(userModel)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Some problem with database in updating the user",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Update successful",
+		"user":    userModel,
+	})
+
 }
