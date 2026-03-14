@@ -101,32 +101,6 @@ Response:
 ```
 
 ---
-
-### POST /auth/update-user [Needs to be done]
-
-Request:
-
-```json
-{
-  "userId": "USER_ID",
-  "fullName": "Harsh Jha",
-  "age": 29,
-  "weight": 72,
-  "height": 175
-}
-```
-
-Response:
-
-```json
-{
-  "success": true,
-  "message": "Profile updated"
-}
-```
-
----
-
 ## FILE / DOCUMENT APIs
 
 ### POST /files/upload
