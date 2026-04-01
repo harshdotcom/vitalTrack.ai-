@@ -13,9 +13,12 @@ Request:
 
 ```json
 {
-  "fullName": "Harsh Jha",
-  "email": "harsh@email.com",
+  "fullName": "Eren Yaegar",
+  "email": "eren@gmail.com",
   "password": "StrongPassword123",
+  "dob": "YYYY-MM-DD",
+  "gender": "Male",
+  "profile_pic": "File"
 }
 ```
 
@@ -24,16 +27,16 @@ Response:
 ```json
 {
     "users": {
-        "user_id": 39,
-        "email": "john@gmail.com",
-        "password": "$2a$12$wH6JBdlTpvmj67kzOu867O8H41r7Kc1CUoW5FyzphYZQn5GZPI3uq",
+        "user_id": 4,
+        "email": "eren@gmail.com",
+        "password": "$2a$12$XhgVWOwypzvYE1gz6CtAAeorysihE7Uzg9t0JExx16t/EDs2Luhlq",
         "GoogleId": null,
-        "name": "John Doe",
-        "age": null,
-        "gender": "",
-        "profile_pic": null,
-        "CreatedAt": "2026-03-05T02:16:08.562392+05:30",
-        "UpdatedAt": "2026-03-05T02:16:08.562392+05:30"
+        "name": "Eren Yaegar",
+        "dob": "1950-11-23T00:00:00+05:30",
+        "gender": "Male",
+        "profile_pic": "profile-pics-eren@gmail.com",
+        "CreatedAt": "2026-03-14T02:38:17.7815419+05:30",
+        "UpdatedAt": "2026-03-14T02:38:17.7815419+05:30"
     }
 }
 ```
@@ -46,8 +49,8 @@ Request:
 
 ```json
 {
-    "email": "mikasa@gmail.com",
-    "password": "123456789"
+    "email": "eren@gmail.com",
+    "password": "StrongPassword123"
 }
 ```
 
@@ -57,17 +60,17 @@ Response:
 {
     "message": "Successfully login",
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1pa2FzYUBnbWFpbC5jb20iLCJleHAiOjE3NzI2NjE2MzgsInVzZXJJZCI6MzZ9.R1M7xjJGezETqKNvQPKBLn5wZ3ejFLCLFXbuzpieh1Y",
-    "user": {
-        "user_id": 36,
-        "email": "mikasa@gmail.com",
-        "password": "$2a$12$eTDWJf3e44Qa9cjcAk18Q.ca2oSEOu/3oArO0M9bzzWuYd3U1tSNK",
+    "users": {
+        "user_id": 4,
+        "email": "eren@gmail.com",
+        "password": "$2a$12$XhgVWOwypzvYE1gz6CtAAeorysihE7Uzg9t0JExx16t/EDs2Luhlq",
         "GoogleId": null,
-        "name": "Mikasa Ackerman",
-        "age": null,
-        "gender": "",
-        "profile_pic": null,
-        "CreatedAt": "2026-03-02T15:50:12.765834+05:30",
-        "UpdatedAt": "2026-03-02T15:50:12.765834+05:30"
+        "name": "Eren Yaegar",
+        "dob": "1950-11-23T00:00:00+05:30",
+        "gender": "Male",
+        "profile_pic": "profile-pics-eren@gmail.com",
+        "CreatedAt": "2026-03-14T02:38:17.7815419+05:30",
+        "UpdatedAt": "2026-03-14T02:38:17.7815419+05:30"
     }
 }
 ```
@@ -579,6 +582,57 @@ Response:
             "Complete iron studies and vitamin B12 assessment for anemia",
             "Consult a gastroenterologist if liver enzymes remain elevated"
         ]
+    }
+}
+```
+---
+
+## User Details API
+
+### GET /user-details/usage
+
+Response:
+
+```json
+{
+    "data": {
+        "UserID": 2,
+        "TotalStorageUsed": 321344
+    },
+    "message": "User storage usage fetched successfully"
+}
+```
+
+### PATCH /user-details/update
+
+Request:
+
+```json
+   {
+    "name": "Ereh Yaegar",
+    "dob": "2000-11-24",
+    "profile_pic": "file",
+    "gender": "Female",
+    "delete_profile_pic": "false"
+    }
+```
+
+Response:
+
+```json
+{
+    "message": "Update successful",
+    "user": {
+        "user_id": 4,
+        "email": "eren@gmail.com",
+        "password": "$2a$12$XhgVWOwypzvYE1gz6CtAAeorysihE7Uzg9t0JExx16t/EDs2Luhlq",
+        "GoogleId": null,
+        "name": "Ereh Yaegar",
+        "dob": "2000-11-24T00:00:00+05:30",
+        "gender": "Male",
+        "profile_pic": null,
+        "CreatedAt": "2026-03-14T02:38:17.781541+05:30",
+        "UpdatedAt": "2026-03-14T02:38:17.781541+05:30"
     }
 }
 ```

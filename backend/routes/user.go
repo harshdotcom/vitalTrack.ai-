@@ -12,23 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type SignupRequest struct {
-	Email    string `form:"email" binding:"required,email"`
-	Password string `form:"password" binding:"required,min=8"`
-	Name     string `form:"name" binding:"required"`
-}
-
-type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-}
-
-type GoogleLoginRequest struct {
-	Token string `json:"token" binding:"required"`
-}
-
 func signup(context *gin.Context) {
-	var signupRequest SignupRequest
+	var signupRequest models.SignupRequest
 	err := context.ShouldBind(&signupRequest) //not with JSON as it will be a form data :)
 
 	if err != nil {
@@ -43,6 +28,9 @@ func signup(context *gin.Context) {
 	user.Email = signupRequest.Email
 	user.Password = &signupRequest.Password
 	user.Name = signupRequest.Name
+	user.DOB = signupRequest.DOB
+	user.Gender = signupRequest.Gender
+	fileHeader := signupRequest.ProfilePic
 
 	existingUser, err := repository.GetUserModelByEmail(user.Email)
 
@@ -91,7 +79,7 @@ func signup(context *gin.Context) {
 
 func login(context *gin.Context) {
 
-	var loginRequest LoginRequest
+	var loginRequest models.LoginRequest
 	err := context.ShouldBindBodyWithJSON(&loginRequest)
 
 	if err != nil {
@@ -137,7 +125,7 @@ func login(context *gin.Context) {
 }
 
 func googleLogin(context *gin.Context) {
-	var req GoogleLoginRequest
+	var req models.GoogleLoginRequest
 	err := context.ShouldBindJSON(&req)
 
 	if err != nil {

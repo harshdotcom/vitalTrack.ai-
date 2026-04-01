@@ -15,7 +15,14 @@ func GetUserModelByEmail(email string) (models.User, error) {
 	err := tx.Error
 
 	return user, err
+}
 
+func GetUserModelById(id int64) (models.User, error) {
+	var user models.User
+	tx := database.DB.Where("user_id = ?", id).First(&user)
+	err := tx.Error
+
+	return user, err
 }
 
 func SaveUser(u *models.User) error {

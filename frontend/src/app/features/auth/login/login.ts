@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -12,7 +12,7 @@ import { ToastService } from '../../../core/services/toast';
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
+export class Login implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -25,6 +25,16 @@ export class Login {
   });
 
   isLoading = false;
+
+  ngOnInit(): void {
+    const state = history.state;
+    if (state?.email) {
+      this.loginForm.patchValue({ email: state.email });
+    }
+    if (state?.password) {
+      this.loginForm.patchValue({ password: state.password });
+    }
+  }
   errorMessage = '';
   showPassword = false;
 

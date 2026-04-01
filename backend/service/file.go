@@ -20,7 +20,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var MAX_ALLOWED_SIZE int64 = 5242880
+var MAX_ALLOWED_SIZE_FILE int64 = 5242880
 
 func UploadFiles(c *gin.Context) {
 
@@ -48,8 +48,6 @@ func UploadFiles(c *gin.Context) {
 
 	var response []gin.H
 
-	bucket := os.Getenv("AWS_BUCKET_NAME")
-
 	for _, file := range files {
 
 		// normalize extension
@@ -63,9 +61,25 @@ func UploadFiles(c *gin.Context) {
 			return
 		}
 
-		if file.Size > MAX_ALLOWED_SIZE {
+		if file.Size > MAX_ALLOWED_SIZE_FILE {
 			c.JSON(413, gin.H{
 				"error": "File size should not be more than 5MB " + file.Filename,
+			})
+			return
+		}
+
+		userID := c.MustGet("user_id").(int64)
+		exceedsLimit, err := exceedStorageLimit(userID, file.Size)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Failed to check storage limit",
+			})
+			return
+		}
+
+		if exceedsLimit {
+			c.JSON(413, gin.H{
+				"error": "User storage limit exceeded. Please delete some files before uploading new ones.",
 			})
 			return
 		}
@@ -74,14 +88,12 @@ func UploadFiles(c *gin.Context) {
 		storedName := uuid.New().String() + ext
 
 		// upload file to S3
-		if err := UploadToS3(file, storedName, bucket); err != nil {
+		if err := UploadToS3(file, storedName, os.Getenv("AWS_BUCKET_NAME")); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "failed to upload to s3",
 			})
 			return
 		}
-
-		userID := c.MustGet("user_id").(int64)
 
 		// create DB model
 		fileModel := models.File{
@@ -210,7 +222,17 @@ func DeleteFile(c *gin.Context) {
 
 	id := c.Param("id")
 	userID := c.MustGet("user_id").(int64)
-	err := DeleteFileFromS3(id)
+	storageKey, err := repository.GetS3Key(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Unable to get S3 key from DB",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	err = DeleteFileFromS3(storageKey)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

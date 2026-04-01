@@ -25,6 +25,7 @@ export class VerifyOtp implements OnInit, OnDestroy {
   });
 
   email = '';
+  password = '';
   isLoading = false;
   isResending = false;
   errorMessage = '';
@@ -36,6 +37,7 @@ export class VerifyOtp implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.email = this.route.snapshot.queryParamMap.get('email') ?? '';
+    this.password = history.state?.password || '';
     // Start the initial 60-second cooldown immediately (OTP was just sent on signup)
     this.startRetryTimer();
   }
@@ -115,6 +117,8 @@ export class VerifyOtp implements OnInit, OnDestroy {
   }
 
   goToLogin(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login'], { 
+      state: { email: this.email, password: this.password } 
+    });
   }
 }

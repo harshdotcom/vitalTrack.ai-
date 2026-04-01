@@ -49,7 +49,10 @@ export class Signup {
       next: (response) => {
         console.log('Signup successful', response);
         this.toastService.showSuccess('Account created! Please check your email for an OTP.');
-        this.router.navigate(['/verify-otp'], { queryParams: { email: userData.email } });
+        this.router.navigate(['/verify-otp'], { 
+          queryParams: { email: userData.email },
+          state: { password: userData.password }
+        });
         this.isLoading = false;
         this.cdr.detectChanges();
       },
