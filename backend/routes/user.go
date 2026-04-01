@@ -29,8 +29,8 @@ func signup(context *gin.Context) {
 	user.Password = &signupRequest.Password
 	user.Name = signupRequest.Name
 	user.DOB = signupRequest.DOB
-	user.Gender = signupRequest.Gender
-	fileHeader := signupRequest.ProfilePic
+	// user.Gender = signupRequest.Gender
+	// fileHeader := signupRequest.ProfilePic
 
 	existingUser, err := repository.GetUserModelByEmail(user.Email)
 

@@ -27,5 +27,8 @@ export const API_CONSTANTS = {
   },
   get VERIFY_OTP_URL() {
     return `${this.BASE_URL}/users/verify-otp`;
+  },
+  get USER_USAGE_URL() {
+    return `${this.BASE_URL}/user-details/usage`;
   }
 };

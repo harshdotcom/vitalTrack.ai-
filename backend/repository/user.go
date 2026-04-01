@@ -85,3 +85,14 @@ func UpdateUser(u *models.User) error {
 func DeleteUserByEmail(email string) error {
 	return database.DB.Where("email = ?", email).Delete(&models.User{}).Error
 }
+
+func GetCurrentStorageUsed(userId int64) (*models.UserUsage, error) {
+	var userUsage models.UserUsage
+	userUsage.UserID = userId
+	tx := database.DB.Table("user_usage").
+		Select("total_storage_used").
+		Where("user_id = ?", userId).
+		Scan(&userUsage.TotalStorageUsed)
+
+	return &userUsage, tx.Error
+}

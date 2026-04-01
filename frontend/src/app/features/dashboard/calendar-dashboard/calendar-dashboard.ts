@@ -64,6 +64,24 @@ export class CalendarDashboard implements OnInit {
     report_date: ['', Validators.required]
   });
 
+  // Storage State
+  totalStorageUsedBytes = 0;
+  MAX_STORAGE_BYTES = 100 * 1024 * 1024; // 100 MB
+  
+  get formattedStorage(): string {
+    const mb = this.totalStorageUsedBytes / (1024 * 1024);
+    return mb.toFixed(1) + ' MB';
+  }
+
+  get storagePercentage(): number {
+    const pct = (this.totalStorageUsedBytes / this.MAX_STORAGE_BYTES) * 100;
+    return Math.min(pct, 100);
+  }
+
+  get storageExceeded(): boolean {
+    return this.totalStorageUsedBytes >= this.MAX_STORAGE_BYTES;
+  }
+
   ngOnInit() {
     // Default to today for new reports
     this.uploadForm.patchValue({
@@ -71,6 +89,7 @@ export class CalendarDashboard implements OnInit {
     });
     this.generateCalendar();
     this.fetchMonthData();
+    this.fetchStorageUsage();
   }
 
   get currentMonthName(): string {
@@ -209,9 +228,28 @@ export class CalendarDashboard implements OnInit {
     this.router.navigate(['/login']);
   }
 
+  fetchStorageUsage() {
+    this.authService.getUserUsage().subscribe({
+      next: (res) => {
+        if (res) {
+          const usedBytes = res?.usage?.TotalStorageUsed ?? res?.data?.TotalStorageUsed;
+          if (usedBytes !== undefined) {
+            this.totalStorageUsedBytes = usedBytes;
+            this.cdr.detectChanges();
+          }
+        }
+      },
+      error: (err) => console.error('Failed to fetch storage usage', err)
+    });
+  }
+
   // --- Upload Modal Methods ---
 
   openUploadModal() {
+    if (this.storageExceeded) {
+      this.toastService.showError('Storage limit reached (100 MB). Please email harshjha92002@gmail.com to upgrade your plan.');
+      return;
+    }
     this.isUploadModalOpen = true;
     document.body.style.overflow = 'hidden';
     this.uploadError = '';
@@ -251,6 +289,9 @@ export class CalendarDashboard implements OnInit {
     const fileType = this.uploadForm.get('file_type')?.value || 'lab_report';
     this.documentService.uploadFile(this.selectedFile, fileType).subscribe({
       next: (uploadRes) => {
+        // Automatically fetch latest usage since the file has hit the backend
+        this.fetchStorageUsage();
+
         if (uploadRes && uploadRes.files && uploadRes.files.length > 0) {
           const fileId = uploadRes.files[0].file_id;
           
@@ -269,6 +310,7 @@ export class CalendarDashboard implements OnInit {
               this.isUploading = false;
               this.closeUploadModal();
               this.fetchMonthData(); // Refresh calendar to show new document
+              this.fetchStorageUsage(); // Refresh storage limit
             },
             error: (err) => {
               console.error('Submit Doc Error', err);
@@ -348,6 +390,7 @@ export class CalendarDashboard implements OnInit {
         this.reportsMap = {};
         this.generateCalendar();
         this.fetchMonthData();
+        this.fetchStorageUsage(); // Refresh storage limit
         
         // If the day modal was open, securely close it to prevent orphaned data
         if (this.isDayModalOpen) {

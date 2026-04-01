@@ -33,6 +33,10 @@ export class AuthService {
     return this.http.post(API_CONSTANTS.VERIFY_OTP_URL, { email, otp });
   }
 
+  getUserUsage(): Observable<any> {
+    return this.http.get(API_CONSTANTS.USER_USAGE_URL);
+  }
+
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }

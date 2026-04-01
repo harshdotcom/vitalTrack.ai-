@@ -6,7 +6,56 @@
             <span class="logo-icon">+</span>
             <h1>Vitatrack.ai</h1>
         </div>
+
         <div class="header-actions">
+
+            <!-- Minimal Storage Chip with hover tooltip -->
+            <div class="storage-chip" [class.storage-chip--danger]="storageExceeded">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                </svg>
+                <span>{{ formattedStorage }}</span>
+
+                <!-- Hover Tooltip -->
+                <div class="storage-tooltip">
+                    <div class="storage-tooltip__header">
+                        <span class="storage-tooltip__title">Storage</span>
+                        <span class="storage-tooltip__badge" [class.danger]="storageExceeded">
+                            {{ storageExceeded ? 'Limit Reached' : 'Active' }}
+                        </span>
+                    </div>
+
+                    <!-- SVG Donut Ring -->
+                    <div class="storage-tooltip__chart">
+                        <svg width="96" height="96" viewBox="0 0 96 96">
+                            <circle cx="48" cy="48" r="38" fill="none" stroke="#E2E8F0" stroke-width="10"/>
+                            <circle cx="48" cy="48" r="38" fill="none"
+                                [attr.stroke]="storageExceeded ? 'var(--error)' : 'var(--primary)'"
+                                stroke-width="10"
+                                stroke-linecap="round"
+                                [attr.stroke-dasharray]="238.76"
+                                [attr.stroke-dashoffset]="238.76 - (238.76 * storagePercentage / 100)"
+                                transform="rotate(-90 48 48)"
+                                style="transition: stroke-dashoffset 0.6s ease"/>
+                        </svg>
+                        <div class="storage-tooltip__chart-label">
+                            <span class="storage-tooltip__pct">{{ storagePercentage | number:'1.0-0' }}%</span>
+                            <span class="storage-tooltip__used">used</span>
+                        </div>
+                    </div>
+
+                    <div class="storage-tooltip__detail">
+                        <span>{{ formattedStorage }} of 100 MB used</span>
+                    </div>
+
+                    <a *ngIf="storageExceeded" href="mailto:harshjha92002@gmail.com" class="storage-tooltip__upgrade">
+                        Request storage upgrade ↗
+                    </a>
+                </div>
+            </div>
+
             <button class="btn-secondary" (click)="logout()">
                 Logout
             </button>
@@ -101,26 +150,26 @@
                 <form [formGroup]="uploadForm" (ngSubmit)="submitDocument()">
 
                     <div class="form-group">
-                        <label>Select File</label>
+                        <label>Select File <span class="required-star">*</span></label>
                         <input type="file" (change)="onFileSelected($event)" class="file-input"
                             accept=".pdf,.png,.jpg,.jpeg">
                         <p class="file-hint" *ngIf="selectedFile">Selected: {{ selectedFile.name }}</p>
                     </div>
 
                     <div class="form-group">
-                        <label for="report_type">Report Name / Type</label>
+                        <label for="report_type">Report Name / Type <span class="required-star">*</span></label>
                         <input type="text" id="report_type" formControlName="report_type"
                             placeholder="e.g. Blood Test Results">
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="report_date">Report Date</label>
+                            <label for="report_date">Report Date <span class="required-star">*</span></label>
                             <input type="date" id="report_date" formControlName="report_date">
                         </div>
 
                         <div class="form-group">
-                            <label for="category">Category</label>
+                            <label for="category">Category <span class="required-star">*</span></label>
                             <select id="category" formControlName="category">
                                 <option value="general">General</option>
                                 <option value="heart">Heart</option>

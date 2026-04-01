@@ -48,6 +48,144 @@
     margin: 0;
 }
 
+/* ── Storage Chip (minimal pill in header-actions) ──────────────── */
+.storage-chip {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1.5px solid #E2E8F0;
+    background: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: default;
+    transition: border-color 0.2s, color 0.2s;
+    user-select: none;
+}
+
+.storage-chip:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.storage-chip--danger {
+    border-color: var(--error) !important;
+    color: var(--error) !important;
+}
+
+/* ── Hover Tooltip Card ──────────────────────────────────────────── */
+.storage-tooltip {
+    display: none;
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 220px;
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.10);
+    z-index: 999;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    animation: fadeInDown 0.18s ease;
+}
+
+.storage-chip:hover .storage-tooltip {
+    display: flex;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.storage-tooltip__header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.storage-tooltip__title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.storage-tooltip__badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #ECFDF5;
+    color: #059669;
+}
+
+.storage-tooltip__badge.danger {
+    background: #FEF2F2;
+    color: var(--error);
+}
+
+/* Donut chart wrapper */
+.storage-tooltip__chart {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.storage-tooltip__chart-label {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+}
+
+.storage-tooltip__pct {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.storage-tooltip__used {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.storage-tooltip__detail {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.storage-tooltip__upgrade {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+    border-top: 1px solid #F1F5F9;
+    padding-top: 10px;
+    margin-top: -4px;
+    transition: opacity 0.15s;
+}
+
+.storage-tooltip__upgrade:hover {
+    opacity: 0.75;
+}
+
+
 /* Calendar Layout */
 .calendar-wrapper {
     max-width: 1200px;
@@ -371,6 +509,11 @@
     font-weight: 500;
     color: var(--text-main);
     margin-bottom: 8px;
+}
+
+.required-star {
+    color: var(--error);
+    margin-left: 2px;
 }
 
 select {
