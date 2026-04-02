@@ -95,6 +95,15 @@
                         </span>
                     </div>
                 </div>
+                <div class="meta-item">
+                    <span class="meta-icon">AI</span>
+                    <div>
+                        <span class="meta-label">AI Analysis</span>
+                        <span class="meta-value" [style.color]="hasGeneratedAnalysis() ? '#047857' : '#92400E'">
+                            {{ hasGeneratedAnalysis() ? 'Generated' : 'Not generated' }}
+                        </span>
+                    </div>
+                </div>
                 <div class="meta-item" *ngIf="docDetails.file_type">
                     <span class="meta-icon">🗂️</span>
                     <div>
@@ -131,7 +140,7 @@
                             </svg>
                         </div>
                         <div class="ai-btn-text">
-                            <span class="ai-btn-title">Get AI Analysis</span>
+                            <span class="ai-btn-title">{{ aiActionLabel }}</span>
                             <span class="ai-btn-sub">Powered by Vitatrack AI</span>
                         </div>
                         <svg class="ai-btn-arrow" xmlns="http://www.w3.org/2000/svg" width="18" height="18"

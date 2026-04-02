@@ -15,7 +15,17 @@ func GetDocumentByID(id string, userID int64) (*models.Document, error) {
 	var doc models.Document
 
 	err := database.DB.
-		Where("id = ? AND user_id = ?", id, userID).
+		Model(&models.Document{}).
+		Preload("File").
+		Select(`
+			documents.*,
+			CASE
+				WHEN medical_report_dbs.id IS NOT NULL THEN true
+				ELSE false
+			END AS analysis_generated
+		`).
+		Joins("LEFT JOIN medical_report_dbs ON medical_report_dbs.id = documents.id").
+		Where("documents.id = ? AND documents.user_id = ?", id, userID).
 		First(&doc).Error
 
 	return &doc, err
@@ -45,11 +55,20 @@ func GetDocumentsByMonth(userID int64, req models.CalendarRequest) ([]models.Doc
 	end := start.AddDate(0, 1, 0)
 
 	query := database.DB.
-		Where("user_id = ?", userID).
-		Where("report_date >= ? AND report_date < ?", start, end)
+		Model(&models.Document{}).
+		Select(`
+			documents.*,
+			CASE
+				WHEN medical_report_dbs.id IS NOT NULL THEN true
+				ELSE false
+			END AS analysis_generated
+		`).
+		Joins("LEFT JOIN medical_report_dbs ON medical_report_dbs.id = documents.id").
+		Where("documents.user_id = ?", userID).
+		Where("documents.report_date >= ? AND documents.report_date < ?", start, end)
 
 	if req.Category != "" {
-		query = query.Where("category = ?", req.Category)
+		query = query.Where("documents.category = ?", req.Category)
 	}
 
 	for _, tag := range req.Tags {

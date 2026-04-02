@@ -603,6 +603,22 @@ Response:
 }
 ```
 
+### GET /user-details/ai-credits
+
+Response:
+
+```json
+{
+    "message": "AI credit usage fetched successfully",
+    "usage": {
+        "usedCredit": 1,
+        "leftCredit": 3,
+        "totalCredit": 4,
+        "renewDate": "2026-05-01T00:00:00+05:30"
+    }
+}
+```
+
 ### PATCH /user-details/update
 
 Request:

@@ -30,5 +30,8 @@ export const API_CONSTANTS = {
   },
   get USER_USAGE_URL() {
     return `${this.BASE_URL}/user-details/usage`;
+  },
+  get AI_CREDITS_URL() {
+    return `${this.BASE_URL}/user-details/ai-credits`;
   }
 };

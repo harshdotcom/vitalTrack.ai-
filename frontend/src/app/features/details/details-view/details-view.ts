@@ -148,6 +148,14 @@ export class DetailsView implements OnInit, OnDestroy {
     });
   }
 
+  hasGeneratedAnalysis(): boolean {
+    return !!this.docDetails?.analysis_generated;
+  }
+
+  get aiActionLabel(): string {
+    return this.hasGeneratedAnalysis() ? 'View AI Analysis' : 'Get AI Analysis';
+  }
+
   goBack() {
     this.router.navigate(['/dashboard']);
   }

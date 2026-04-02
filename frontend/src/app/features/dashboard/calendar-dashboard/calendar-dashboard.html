@@ -50,8 +50,60 @@
                         <span>{{ formattedStorage }} of 100 MB used</span>
                     </div>
 
-                    <a *ngIf="storageExceeded" href="mailto:harshjha92002@gmail.com" class="storage-tooltip__upgrade">
+                    <a *ngIf="storageExceeded" href="mailto:support.vitatrack@gmail.com?subject=Request%20for%20Storage%20Upgrade&body=Hi%2C%0AI%20would%20like%20to%20request%20a%20storage%20upgrade%20for%20my%20VitaTrack%20account." class="storage-tooltip__upgrade">
                         Request storage upgrade ↗
+                    </a>
+                </div>
+            </div>
+
+            <!-- AI Credits Chip with hover tooltip -->
+            <div class="storage-chip ai-chip" [class.storage-chip--danger]="aiCreditsExceeded">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/>
+                </svg>
+                <span>{{ aiUsedCredit }} / {{ aiTotalCredit }} AI</span>
+
+                <!-- Hover Tooltip -->
+                <div class="storage-tooltip ai-tooltip">
+                    <div class="storage-tooltip__header">
+                        <span class="storage-tooltip__title">AI Credits</span>
+                        <span class="storage-tooltip__badge" [class.danger]="aiCreditsExceeded">
+                            {{ aiCreditsExceeded ? 'Exhausted' : 'Active' }}
+                        </span>
+                    </div>
+
+                    <!-- Donut Ring -->
+                    <div class="storage-tooltip__chart">
+                        <svg width="96" height="96" viewBox="0 0 96 96">
+                            <circle cx="48" cy="48" r="38" fill="none" stroke="#E2E8F0" stroke-width="10"/>
+                            <circle cx="48" cy="48" r="38" fill="none"
+                                [attr.stroke]="aiCreditsExceeded ? 'var(--error)' : '#8B5CF6'"
+                                stroke-width="10"
+                                stroke-linecap="round"
+                                [attr.stroke-dasharray]="238.76"
+                                [attr.stroke-dashoffset]="238.76 - (238.76 * aiCreditPercentage / 100)"
+                                transform="rotate(-90 48 48)"
+                                style="transition: stroke-dashoffset 0.6s ease"/>
+                        </svg>
+                        <div class="storage-tooltip__chart-label">
+                            <span class="storage-tooltip__pct ai-pct">{{ aiUsedCredit }}</span>
+                            <span class="storage-tooltip__used">used</span>
+                        </div>
+                    </div>
+
+                    <div class="storage-tooltip__detail">
+                        <span>{{ aiUsedCredit }} of {{ aiTotalCredit }} credits used</span>
+                    </div>
+
+                    <div *ngIf="formattedRenewDate" class="ai-renew-date">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                        </svg>
+                        Renews {{ formattedRenewDate }}
+                    </div>
+
+                    <a *ngIf="aiCreditsExceeded" href="mailto:support.vitatrack@gmail.com?subject=Request%20for%20AI%20Credit%20Upgrade&body=Hi%2C%0AI%20would%20like%20to%20request%20additional%20AI%20credits%20for%20my%20VitaTrack%20account." class="storage-tooltip__upgrade">
+                        Request more credits ↗
                     </a>
                 </div>
             </div>
@@ -59,7 +111,7 @@
             <button class="btn-secondary" (click)="logout()">
                 Logout
             </button>
-            <button class="btn-primary" (click)="openUploadModal()">
+            <button class="btn-primary" (click)="openUploadModal()" [disabled]="storageExceeded" [title]="storageExceeded ? 'Storage limit reached (100 MB)' : 'Upload a new report'">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -109,6 +161,9 @@
                         <div *ngFor="let doc of cell.documents | slice:0:3" class="doc-badge" [title]="doc.report_type"
                             (click)="openDocumentDetails(doc.id); $event.stopPropagation()">
                             <span class="doc-badge-text">{{ doc.report_type }}</span>
+                            <span *ngIf="doc.analysis_generated" title="AI analysis available"
+                                style="display: inline-flex; width: 8px; height: 8px; border-radius: 999px; background: #10B981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18); flex-shrink: 0;">
+                            </span>
                             <span class="delete-icon" title="Delete"
                                 (click)="openDeleteModal(doc); $event.stopPropagation()">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
@@ -214,7 +269,13 @@
                 <div *ngFor="let doc of selectedDayDocuments" class="doc-badge"
                     style="cursor: pointer; padding: 12px; display: flex; align-items: center; justify-content: space-between; font-size: 1rem;"
                     (click)="openDocumentDetails(doc.id); closeDayModal()">
-                    <span>{{ doc.report_type }}</span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px;">
+                        <span>{{ doc.report_type }}</span>
+                        <span *ngIf="doc.analysis_generated"
+                            style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; background: #ECFDF5; color: #047857; font-size: 0.75rem; font-weight: 600;">
+                            AI Ready
+                        </span>
+                    </span>
                     <span class="delete-icon" title="Delete" (click)="openDeleteModal(doc); $event.stopPropagation()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -289,6 +350,14 @@
                             <span class="info-value status-badge" [ngClass]="selectedDocDetails.status">{{
                                 selectedDocDetails.status }}</span>
                         </div>
+                        <div class="info-row">
+                            <span class="info-label">AI Analysis:</span>
+                            <span class="info-value"
+                                [style.color]="hasGeneratedAnalysis(selectedDocDetails) ? '#047857' : '#92400E'"
+                                [style.fontWeight]="600">
+                                {{ hasGeneratedAnalysis(selectedDocDetails) ? 'Generated' : 'Not generated' }}
+                            </span>
+                        </div>
 
                         <div class="info-row"
                             *ngIf="selectedDocDetails.parsedTags && selectedDocDetails.parsedTags.length > 0"
@@ -304,8 +373,9 @@
                             style="margin-top: 30px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid #E5E7EB; padding-top: 28px;">
 
                             <!-- AI Analysis CTA -->
-                            <button class="btn-ai-analysis-modal" (click)="getAiAnalysis()" [disabled]="isAnalyzing">
-                                <ng-container *ngIf="!isAnalyzing">
+                            <button class="btn-ai-analysis-modal" (click)="getAiAnalysis()" 
+                                [disabled]="isAnalyzing || (!selectedDocDetails?.analysis_generated && aiCreditsExceeded)">
+                                <ng-container *ngIf="!isAnalyzing && !(aiCreditsExceeded && !selectedDocDetails?.analysis_generated)">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2">
                                         <path
@@ -315,13 +385,41 @@
                                             d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z">
                                         </path>
                                     </svg>
-                                    Get AI Analysis
+                                    <span>{{ selectedDocDetails?.analysis_generated ? 'View AI Analysis' : 'Get AI Analysis' }}</span>
+                                </ng-container>
+                                <ng-container *ngIf="!selectedDocDetails?.analysis_generated && aiCreditsExceeded && !isAnalyzing">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                    <span>AI Credits Exhausted</span>
                                 </ng-container>
                                 <ng-container *ngIf="isAnalyzing">
                                     <span class="loader"></span>
                                     Analyzing...
                                 </ng-container>
                             </button>
+
+                            <a *ngIf="!selectedDocDetails?.analysis_generated && aiCreditsExceeded" class="ai-exhausted-upgrade"
+                               (click)="$event.preventDefault(); toggleCreditsSupportPopup()"
+                               href="mailto:support.vitatrack@gmail.com?subject=Request%20for%20AI%20Credit%20Upgrade&body=Hi%2C%0AI%20would%20like%20to%20request%20additional%20AI%20credits%20for%20my%20VitaTrack%20account.">
+                                Request more credits ↗
+                            </a>
+
+                            <div *ngIf="showCreditsSupportPopup" class="ai-support-popup">
+                                <div class="ai-support-popup__header">
+                                    <span>Write to us</span>
+                                    <button type="button" class="ai-support-popup__close"
+                                        (click)="toggleCreditsSupportPopup()">×</button>
+                                </div>
+                                <p class="ai-support-popup__text">
+                                    For additional AI credits, email us at
+                                    <strong>support.vitatrack@gmail.com</strong>.
+                                </p>
+                                <button type="button" class="ai-support-popup__action"
+                                    (click)="requestCreditsUpgrade()">
+                                    Compose in Gmail
+                                </button>
+                            </div>
 
                             <div class="api-error" *ngIf="analyzeError" style="margin-top: 0;">{{ analyzeError }}</div>
 

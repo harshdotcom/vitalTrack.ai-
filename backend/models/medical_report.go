@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"time"
 
 	"gorm.io/datatypes"
 )
@@ -26,6 +27,8 @@ type MedicalReportDB struct {
 	OverallRiskLevel    string
 	Recommendations     datatypes.JSON `gorm:"type:jsonb"`
 	FollowUpSuggestions datatypes.JSON `gorm:"type:jsonb"`
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
 }
 
 func GetMedicalReportDBFormat(report *MedicalReport, fileId string) *MedicalReportDB {

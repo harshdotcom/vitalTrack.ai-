@@ -82,14 +82,37 @@ export class CalendarDashboard implements OnInit {
     return this.totalStorageUsedBytes >= this.MAX_STORAGE_BYTES;
   }
 
+  // AI Credit State
+  aiLeftCredit = 0;
+  aiTotalCredit = 0;
+  aiRenewDate: string = '';
+
+  get aiUsedCredit(): number {
+    return this.aiTotalCredit - this.aiLeftCredit;
+  }
+
+  get aiCreditPercentage(): number {
+    if (this.aiTotalCredit === 0) return 0;
+    return Math.min((this.aiUsedCredit / this.aiTotalCredit) * 100, 100);
+  }
+
+  get aiCreditsExceeded(): boolean {
+    return this.aiLeftCredit === 0;
+  }
+
+  get formattedRenewDate(): string {
+    if (!this.aiRenewDate) return '';
+    return new Date(this.aiRenewDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
   ngOnInit() {
-    // Default to today for new reports
     this.uploadForm.patchValue({
       report_date: this.formatDateForApi(new Date())
     });
     this.generateCalendar();
     this.fetchMonthData();
     this.fetchStorageUsage();
+    this.fetchAICredits();
   }
 
   get currentMonthName(): string {
@@ -240,6 +263,20 @@ export class CalendarDashboard implements OnInit {
         }
       },
       error: (err) => console.error('Failed to fetch storage usage', err)
+    });
+  }
+
+  fetchAICredits() {
+    this.authService.getAICredits().subscribe({
+      next: (res) => {
+        if (res?.usage) {
+          this.aiLeftCredit = res.usage.leftCredit ?? 0;
+          this.aiTotalCredit = res.usage.totalCredit ?? 0;
+          this.aiRenewDate = res.usage.renewDate ?? '';
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => console.error('Failed to fetch AI credits', err)
     });
   }
 
@@ -415,6 +452,7 @@ export class CalendarDashboard implements OnInit {
   analyzeError = '';
   isFullscreenImage: boolean = false;
   pdfBlobUrl: string | null = null;
+  showCreditsSupportPopup = false;
 
   // --- Details Modal Methods ---
   openDocumentDetails(docId: string) {
@@ -542,12 +580,29 @@ export class CalendarDashboard implements OnInit {
     this.isFullscreenImage = false;
     this.isAnalyzing = false;
     this.analyzeError = '';
+    this.showCreditsSupportPopup = false;
     
     // Cleanup memory from our temporary blob URLs
     if (this.pdfBlobUrl) {
       URL.revokeObjectURL(this.pdfBlobUrl);
       this.pdfBlobUrl = null;
     }
+  }
+
+  requestCreditsUpgrade() {
+    this.showCreditsSupportPopup = false;
+    window.open(
+      'https://mail.google.com/mail/?view=cm&fs=1&to=support.vitatrack@gmail.com&subject=Request%20for%20AI%20Credit%20Upgrade&body=Hi,%20I%20would%20like%20more%20credits',
+      '_blank'
+    );
+  }
+
+  toggleCreditsSupportPopup() {
+    this.showCreditsSupportPopup = !this.showCreditsSupportPopup;
+  }
+
+  hasGeneratedAnalysis(doc: any): boolean {
+    return !!doc?.analysis_generated;
   }
 
   getAiAnalysis() {
@@ -580,6 +635,10 @@ export class CalendarDashboard implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  getAiActionLabel(doc: any): string {
+    return this.hasGeneratedAnalysis(doc) ? 'View AI Analysis' : 'Get AI Analysis';
   }
 
   isImageFile(): boolean {

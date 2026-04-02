@@ -37,6 +37,10 @@ export class AuthService {
     return this.http.get(API_CONSTANTS.USER_USAGE_URL);
   }
 
+  getAICredits(): Observable<any> {
+    return this.http.get(API_CONSTANTS.AI_CREDITS_URL);
+  }
+
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
