@@ -43,7 +43,8 @@ func SaveUser(u *models.User) error {
 func ValidateCredential(u *models.User) error {
 
 	enteredPassword := u.Password
-	err := database.DB.Where("email = ?", u.Email).First(u).Error
+	tx := database.DB.Where("email = ?", u.Email).First(u)
+	err := tx.Error
 	if err != nil {
 
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -51,6 +52,10 @@ func ValidateCredential(u *models.User) error {
 		}
 
 		return err
+	}
+
+	if u.IsVerified == false {
+		return errors.New("User with this email does not exists")
 	}
 
 	isValid := utility.ValidateEnteredPassword(*enteredPassword, *u.Password)
