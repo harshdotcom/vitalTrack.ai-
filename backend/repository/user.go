@@ -54,14 +54,14 @@ func ValidateCredential(u *models.User) error {
 		return err
 	}
 
-	if u.IsVerified == false {
-		return errors.New("User with this email does not exists")
-	}
-
 	isValid := utility.ValidateEnteredPassword(*enteredPassword, *u.Password)
 
 	if !isValid {
 		return errors.New("Entered Password is Incorrect")
+	}
+
+	if u.IsVerified == false {
+		return errors.New("User is not verified")
 	}
 
 	return nil
@@ -99,7 +99,7 @@ func UpdateUser(userModel *models.User) error {
 	// 	userModel.DOB = &tempDOB
 	// }
 
-	return database.DB.Exec(query, userModel.Name, userModel.DOB, userModel.Gender, userModel.ProfilePic, userModel.UserId).Error
+	return database.DB.Exec(query, userModel.Name, userModel.DOB, userModel.Gender, userModel.ProfilePic, userModel.IsVerified, userModel.OTP, userModel.UserId).Error
 }
 
 func DeleteUserByEmail(email string) error {

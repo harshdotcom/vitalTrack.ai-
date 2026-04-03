@@ -99,7 +99,7 @@ func login(context *gin.Context) {
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid Credentials",
+			"message": err.Error(),
 			"error":   err.Error(),
 		})
 
