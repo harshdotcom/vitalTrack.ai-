@@ -7,7 +7,6 @@ import (
 	"time"
 	"vita-track-ai/models"
 	"vita-track-ai/repository"
-	"vita-track-ai/service"
 	"vita-track-ai/utility"
 
 	"github.com/gin-gonic/gin"
@@ -212,39 +211,6 @@ func googleLogin(context *gin.Context) {
 		"message": "Google login successful",
 		"user":    userModel,
 		"token":   token,
-	})
-
-}
-
-func updateProfile(context *gin.Context) {
-
-	var updateUserReq models.UpdateUserRequest
-	err := context.ShouldBind(&updateUserReq)
-
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message": "Unable to pass the values into the updateProfile",
-			"error":   err.Error(),
-		})
-
-		return
-	}
-
-	userID := context.MustGet("user_id").(int64)
-
-	userModel, err := service.ManageUserUpdateRequest(updateUserReq, userID)
-
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "There is a problem in updating the user",
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Update successful",
-		"user":    userModel,
 	})
 
 }
