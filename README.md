@@ -102,17 +102,19 @@ Response:
 
 ---
 
-### POST /auth/update-user [Needs to be done]
+### PATCH /user-details/update
 
 Request:
 
-```json
+```json form-data
 {
-  "userId": "USER_ID",
-  "fullName": "Harsh Jha",
-  "age": 29,
-  "weight": 72,
-  "height": 175
+  "name": "Harsh Jha",
+  "dob": 2000-11-23,
+  "profile_pic": file_data,
+  "gender": "Male",
+  "delete_profile_pic": false,
+
+
 }
 ```
 
@@ -120,8 +122,22 @@ Response:
 
 ```json
 {
-  "success": true,
-  "message": "Profile updated"
+    "message": "Update successful",
+    "user": {
+        "user_id": 2,
+        "email": "hj@gmail.com",
+        "password": "$2a$12$QROZVEFhb7VGeNavjwoc6O54I9WJnV8eY41PXrvQ2YWpyumGqEN4u",
+        "GoogleId": null,
+        "name": "Harsh Jha",
+        "age": null,
+        "gender": "Male",
+        "profile_pic": "profile-pics-hj@gmail.com",
+        "dob": "2000-11-23T00:00:00+05:30",
+        "is_verified": true,
+        "OTPExpiresAt": "2026-04-03T00:24:56.483686+05:30",
+        "CreatedAt": "2026-04-03T00:19:56.701091+05:30",
+        "UpdatedAt": "2026-04-03T01:02:31.789514+05:30"
+    }
 }
 ```
 
