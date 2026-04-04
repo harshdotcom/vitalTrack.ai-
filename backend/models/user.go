@@ -11,7 +11,6 @@ type User struct {
 	Password     *string `json:"password" binding:"required"`
 	GoogleId     *string
 	Name         string     `json:"name" binding:"required" gorm:"not null"`
-	Age          *int64     `json:"age"`
 	Gender       string     `json:"gender"`
 	ProfilePic   *string    `json:"profile_pic"`
 	DOB          *time.Time `json:"dob"`
