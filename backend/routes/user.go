@@ -127,6 +127,132 @@ func login(context *gin.Context) {
 
 }
 
+func verifyOTP(context *gin.Context) {
+
+	var req struct {
+		Email string `json:"email"`
+		OTP   string `json:"otp"`
+	}
+
+	if err := context.ShouldBindJSON(&req); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	otpModel, err := repository.GetOTPModelByEmail(req.Email)
+
+	if err != nil {
+		context.JSON(http.StatusNotFound, gin.H{"message": "OTP not found"})
+		return
+	}
+
+	if otpModel.OTP == nil || *otpModel.OTP != req.OTP {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid OTP"})
+		return
+	}
+
+	if otpModel.OTPExpiresAt.Before(time.Now()) {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "OTP expired"})
+		return
+	}
+
+	err = repository.MakeUserVerified(req.Email)
+
+	if err != nil {
+		context.JSON(http.StatusNotFound, gin.H{"message": "There is some problem in verifying the user"})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Email verified successfully",
+	})
+}
+
+func forgotPassword(context *gin.Context) {
+	var forgetPasswordRequest models.ForgetPasswordRequest
+	err := context.ShouldBindJSON(&forgetPasswordRequest)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "Unable to pass the values into the ForgetPassword object",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	user, err := repository.GetUserModelByEmail(forgetPasswordRequest.Email)
+
+	if err != nil {
+		context.JSON(http.StatusNotFound, gin.H{
+			"message": "Unable to find the user with this email",
+			"error":   err.Error(),
+		})
+		return
+	}
+	
+	otpModel := utility.GenerateOTP()
+	otpModel.Id = user.UserId
+	otpModel.Email = user.Email
+	
+	err = repository.SaveOTP(&otpModel)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to generate OTP",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	go utility.SendEmail(user.Email, *otpModel.OTP)
+
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Please verify OTP sent to your email to change your password.",
+	})
+}
+
+func resetPassword(context *gin.Context) {
+	var req models.ResetPasswordRequest
+
+	if err := context.ShouldBindJSON(&req); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	otpModel, err := repository.GetOTPModelByEmail(req.Email)
+	if err != nil {
+		context.JSON(http.StatusNotFound, gin.H{"message": "OTP not found"})
+		return
+	}
+
+	if otpModel.OTP == nil || *otpModel.OTP != req.OTP {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid OTP"})
+		return
+	}
+
+	if otpModel.OTPExpiresAt.Before(time.Now()) {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "OTP expired"})
+		return
+	}
+
+	hashedPassword, err := utility.HashPassword(req.NewPassword)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not hash password"})
+		return
+	}
+
+	err = repository.UpdatePassword(req.Email, *hashedPassword)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not update password"})
+		return
+	}
+
+	repository.DeleteOTPByEmail(req.Email)
+
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Password updated successfully",
+	})
+}
+
 func googleLogin(context *gin.Context) {
 	var req models.GoogleLoginRequest
 	err := context.ShouldBindJSON(&req)
@@ -216,45 +342,4 @@ func googleLogin(context *gin.Context) {
 		"token":   token,
 	})
 
-}
-
-func verifyOTP(context *gin.Context) {
-
-	var req struct {
-		Email string `json:"email"`
-		OTP   string `json:"otp"`
-	}
-
-	if err := context.ShouldBindJSON(&req); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	otpModel, err := repository.GetOTPModelByEmail(req.Email)
-
-	if err != nil {
-		context.JSON(http.StatusNotFound, gin.H{"message": "OTP not found"})
-		return
-	}
-
-	if otpModel.OTP == nil || *otpModel.OTP != req.OTP {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid OTP"})
-		return
-	}
-
-	if otpModel.OTPExpiresAt.Before(time.Now()) {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "OTP expired"})
-		return
-	}
-
-	err = repository.MakeUserVerified(req.Email)
-
-	if err != nil {
-		context.JSON(http.StatusNotFound, gin.H{"message": "There is some problem in verifying the user"})
-		return
-	}
-
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Email verified successfully",
-	})
 }

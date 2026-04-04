@@ -54,3 +54,14 @@ type UpdateUserRequest struct {
 	Gender           *string               `form:"gender"`
 	ProfilePic       *multipart.FileHeader `form:"profile_pic"`
 }
+
+// ===========================Forget Password Request=================================================
+type ForgetPasswordRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+type ResetPasswordRequest struct {
+	Email       string `json:"email" binding:"required,email"`
+	OTP         string `json:"otp" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required,min=8"`
+}

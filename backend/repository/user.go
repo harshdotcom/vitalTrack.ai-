@@ -122,3 +122,9 @@ func MakeUserVerified(email string) error {
 		Where("email = ?", email).
 		Update("is_verified", true).Error
 }
+
+func UpdatePassword(email string, newHashedPassword string) error {
+	return database.DB.Model(&models.User{}).
+		Where("email = ?", email).
+		Update("password", newHashedPassword).Error
+}

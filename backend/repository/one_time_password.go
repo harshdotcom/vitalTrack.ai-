@@ -21,3 +21,7 @@ func GetOTPModelByEmail(email string) (models.OneTimePassword, error) {
 
 	return otpModel, err
 }
+
+func DeleteOTPByEmail(email string) error {
+	return database.DB.Where("email = ?", email).Delete(&models.OneTimePassword{}).Error
+}
