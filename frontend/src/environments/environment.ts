@@ -1,4 +1,4 @@
 export const environment = {
-  production: true,
-  apiUrl: 'http://localhost:8081/api/v1'
+  production: false,
+  apiUrl: 'https://vitaltrack-ai.onrender.com/api/v1'
 };
