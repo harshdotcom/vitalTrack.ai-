@@ -12,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary Get User Usage
+// @Router /api/v1/user-details/usage [get]
 func getUserUsage(context *gin.Context) {
 	userId := context.MustGet("user_id").(int64)
 
@@ -30,6 +32,8 @@ func getUserUsage(context *gin.Context) {
 	})
 }
 
+// @Summary Get AI Credit Usage
+// @Router /api/v1/user-details/ai-credits [get]
 func getAICreditUsage(context *gin.Context) {
 	userID := context.MustGet("user_id").(int64)
 	periodStart, renewDate := currentMonthlyCreditWindow(time.Now())
@@ -93,6 +97,8 @@ func getBaseMonthlyAICredits() int64 {
 	return credits
 }
 
+// @Summary Update User Profile
+// @Router /api/v1/user-details/update [patch]
 func updateProfile(context *gin.Context) {
 
 	var updateUserReq models.UpdateUserRequest

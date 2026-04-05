@@ -7,10 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary Upload File
+// @Router /api/v1/files/upload [post]
 func uploadFile(c *gin.Context) {
 	service.UploadFiles(c)
 }
 
+// @Summary Get File
+// @Router /api/v1/files/{id} [get]
 func getFile(c *gin.Context) {
 
 	id := c.Param("id")
@@ -28,6 +32,8 @@ func getFile(c *gin.Context) {
 	})
 }
 
+// @Summary Get File Text
+// @Router /api/v1/files/ocr/{id} [get]
 func getFileText(c *gin.Context) {
 	fileId := c.Param("id")
 	text, err := service.GenerateOCRText(fileId)
@@ -45,6 +51,8 @@ func getFileText(c *gin.Context) {
 	})
 }
 
+// @Summary Get File AI Analysis
+// @Router /api/v1/files/ai/{id} [get]
 func getFileAnalysis(c *gin.Context) {
 	fileId := c.Param("id")
 	jsonText, err := service.AnalyzeMedicalReport(fileId)
@@ -63,6 +71,8 @@ func getFileAnalysis(c *gin.Context) {
 
 }
 
+// @Summary Delete File
+// @Router /api/v1/files/{id} [delete]
 func deleteFile(c *gin.Context) {
 	service.DeleteFile(c)
 }

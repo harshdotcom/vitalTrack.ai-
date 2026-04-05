@@ -12,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary User Signup
+// @Router /api/v1/users/signup [post]
 func signup(context *gin.Context) {
 	var signupRequest models.SignupRequest
 	err := context.ShouldBind(&signupRequest) //not with JSON as it will be a form data :)
@@ -80,6 +82,8 @@ func signup(context *gin.Context) {
 	})
 }
 
+// @Summary User Login
+// @Router /api/v1/users/login [post]
 func login(context *gin.Context) {
 
 	var loginRequest models.LoginRequest
@@ -127,6 +131,8 @@ func login(context *gin.Context) {
 
 }
 
+// @Summary Verify OTP
+// @Router /api/v1/users/verify-otp [post]
 func verifyOTP(context *gin.Context) {
 
 	var req struct {
@@ -168,6 +174,8 @@ func verifyOTP(context *gin.Context) {
 	})
 }
 
+// @Summary Forgot Password
+// @Router /api/v1/users/forgot-password [post]
 func forgotPassword(context *gin.Context) {
 	var forgetPasswordRequest models.ForgetPasswordRequest
 	err := context.ShouldBindJSON(&forgetPasswordRequest)
@@ -210,6 +218,8 @@ func forgotPassword(context *gin.Context) {
 	})
 }
 
+// @Summary Reset Password
+// @Router /api/v1/users/reset-password [post]
 func resetPassword(context *gin.Context) {
 	var req models.ResetPasswordRequest
 
@@ -253,6 +263,8 @@ func resetPassword(context *gin.Context) {
 	})
 }
 
+// @Summary Google Login
+// @Router /api/v1/users/google [post]
 func googleLogin(context *gin.Context) {
 	var req models.GoogleLoginRequest
 	err := context.ShouldBindJSON(&req)

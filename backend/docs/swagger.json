@@ -1,0 +1,123 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API documentation for Vita Track AI",
+        "title": "Vita Track AI API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8081",
+    "basePath": "/api/v1",
+    "paths": {
+        "/api/v1/documents": {
+            "post": {
+                "summary": "Create Document",
+                "responses": {}
+            }
+        },
+        "/api/v1/documents/calendar": {
+            "post": {
+                "summary": "Get Calendar Documents",
+                "responses": {}
+            }
+        },
+        "/api/v1/documents/update/{id}": {
+            "patch": {
+                "summary": "Update Document",
+                "responses": {}
+            }
+        },
+        "/api/v1/documents/{id}": {
+            "get": {
+                "summary": "Get Document",
+                "responses": {}
+            },
+            "delete": {
+                "summary": "Delete Document",
+                "responses": {}
+            }
+        },
+        "/api/v1/files/ai/{id}": {
+            "get": {
+                "summary": "Get File AI Analysis",
+                "responses": {}
+            }
+        },
+        "/api/v1/files/ocr/{id}": {
+            "get": {
+                "summary": "Get File Text",
+                "responses": {}
+            }
+        },
+        "/api/v1/files/upload": {
+            "post": {
+                "summary": "Upload File",
+                "responses": {}
+            }
+        },
+        "/api/v1/files/{id}": {
+            "get": {
+                "summary": "Get File",
+                "responses": {}
+            },
+            "delete": {
+                "summary": "Delete File",
+                "responses": {}
+            }
+        },
+        "/api/v1/user-details/ai-credits": {
+            "get": {
+                "summary": "Get AI Credit Usage",
+                "responses": {}
+            }
+        },
+        "/api/v1/user-details/update": {
+            "patch": {
+                "summary": "Update User Profile",
+                "responses": {}
+            }
+        },
+        "/api/v1/user-details/usage": {
+            "get": {
+                "summary": "Get User Usage",
+                "responses": {}
+            }
+        },
+        "/api/v1/users/forgot-password": {
+            "post": {
+                "summary": "Forgot Password",
+                "responses": {}
+            }
+        },
+        "/api/v1/users/google": {
+            "post": {
+                "summary": "Google Login",
+                "responses": {}
+            }
+        },
+        "/api/v1/users/login": {
+            "post": {
+                "summary": "User Login",
+                "responses": {}
+            }
+        },
+        "/api/v1/users/reset-password": {
+            "post": {
+                "summary": "Reset Password",
+                "responses": {}
+            }
+        },
+        "/api/v1/users/signup": {
+            "post": {
+                "summary": "User Signup",
+                "responses": {}
+            }
+        },
+        "/api/v1/users/verify-otp": {
+            "post": {
+                "summary": "Verify OTP",
+                "responses": {}
+            }
+        }
+    }
+}

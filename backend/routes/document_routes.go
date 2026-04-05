@@ -8,22 +8,32 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary Create Document
+// @Router /api/v1/documents [post]
 func createDocument(c *gin.Context) {
 	service.CreateDocument(c)
 }
 
+// @Summary Get Document
+// @Router /api/v1/documents/{id} [get]
 func getDocument(c *gin.Context) {
 	service.GetDocument(c)
 }
 
+// @Summary Delete Document
+// @Router /api/v1/documents/{id} [delete]
 func deleteDocument(c *gin.Context) {
 	service.DeleteDocument(c)
 }
 
+// @Summary Get Calendar Documents
+// @Router /api/v1/documents/calendar [post]
 func getCalendarDocuments(c *gin.Context) {
 	service.GetCalendarDocuments(c)
 }
 
+// @Summary Update Document
+// @Router /api/v1/documents/update/{id} [patch]
 func updateDocument(c *gin.Context) {
 	var updateDocReq models.UpdateDocumentRequest
 	err := c.ShouldBind(&updateDocReq)

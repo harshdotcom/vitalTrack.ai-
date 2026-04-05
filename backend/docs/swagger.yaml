@@ -1,0 +1,83 @@
+basePath: /api/v1
+host: localhost:8081
+info:
+  contact: {}
+  description: API documentation for Vita Track AI
+  title: Vita Track AI API
+  version: "1.0"
+paths:
+  /api/v1/documents:
+    post:
+      responses: {}
+      summary: Create Document
+  /api/v1/documents/{id}:
+    delete:
+      responses: {}
+      summary: Delete Document
+    get:
+      responses: {}
+      summary: Get Document
+  /api/v1/documents/calendar:
+    post:
+      responses: {}
+      summary: Get Calendar Documents
+  /api/v1/documents/update/{id}:
+    patch:
+      responses: {}
+      summary: Update Document
+  /api/v1/files/{id}:
+    delete:
+      responses: {}
+      summary: Delete File
+    get:
+      responses: {}
+      summary: Get File
+  /api/v1/files/ai/{id}:
+    get:
+      responses: {}
+      summary: Get File AI Analysis
+  /api/v1/files/ocr/{id}:
+    get:
+      responses: {}
+      summary: Get File Text
+  /api/v1/files/upload:
+    post:
+      responses: {}
+      summary: Upload File
+  /api/v1/user-details/ai-credits:
+    get:
+      responses: {}
+      summary: Get AI Credit Usage
+  /api/v1/user-details/update:
+    patch:
+      responses: {}
+      summary: Update User Profile
+  /api/v1/user-details/usage:
+    get:
+      responses: {}
+      summary: Get User Usage
+  /api/v1/users/forgot-password:
+    post:
+      responses: {}
+      summary: Forgot Password
+  /api/v1/users/google:
+    post:
+      responses: {}
+      summary: Google Login
+  /api/v1/users/login:
+    post:
+      responses: {}
+      summary: User Login
+  /api/v1/users/reset-password:
+    post:
+      responses: {}
+      summary: Reset Password
+  /api/v1/users/signup:
+    post:
+      responses: {}
+      summary: User Signup
+  /api/v1/users/verify-otp:
+    post:
+      responses: {}
+      summary: Verify OTP
+swagger: "2.0"

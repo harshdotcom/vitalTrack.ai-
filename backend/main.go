@@ -7,11 +7,18 @@ import (
 	"vita-track-ai/routes"
 	"vita-track-ai/service"
 
+	_ "vita-track-ai/docs"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
+// @title Vita Track AI API
+// @version 1.0
+// @description API documentation for Vita Track AI
+// @host localhost:8081
+// @BasePath /api/v1
 func main() {
 
 	// Load env

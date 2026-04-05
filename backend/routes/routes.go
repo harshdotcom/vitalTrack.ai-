@@ -4,10 +4,12 @@ import (
 	"vita-track-ai/middleware"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func RegisterRoutes(server *gin.Engine) {
-
+	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	api := server.Group("/api/v1")
 
 	// PUBLIC routes (no auth)
