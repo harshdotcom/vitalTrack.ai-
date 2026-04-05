@@ -90,7 +90,8 @@ func UploadFiles(c *gin.Context) {
 		// upload file to S3
 		if err := UploadToS3(file, storedName, os.Getenv("AWS_BUCKET_NAME")); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "failed to upload to s3",
+				"message": "failed to upload to s3",
+				"error":   err.Error(),
 			})
 			return
 		}
