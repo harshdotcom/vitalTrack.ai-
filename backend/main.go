@@ -19,6 +19,9 @@ import (
 // @description API documentation for Vita Track AI
 // @host localhost:8081
 // @BasePath /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 
 	// Load env
