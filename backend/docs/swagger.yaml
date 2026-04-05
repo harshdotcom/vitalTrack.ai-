@@ -1,0 +1,393 @@
+basePath: /api/v1
+definitions:
+  models.ForgetPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  models.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.ResetPasswordRequest:
+    properties:
+      email:
+        type: string
+      new_password:
+        minLength: 8
+        type: string
+      otp:
+        type: string
+    required:
+    - email
+    - new_password
+    - otp
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: API documentation for Vita Track AI
+  title: Vita Track AI API
+  version: "1.0"
+paths:
+  /documents:
+    post:
+      responses: {}
+      summary: Create Document
+      tags:
+      - Document
+  /documents/{id}:
+    delete:
+      responses: {}
+      summary: Delete Document
+      tags:
+      - Document
+    get:
+      responses: {}
+      summary: Get Document
+      tags:
+      - Document
+  /documents/calendar:
+    post:
+      responses: {}
+      summary: Get Calendar Documents
+      tags:
+      - Document
+  /documents/update/{id}:
+    patch:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Category
+        in: formData
+        name: category
+        type: string
+      - description: ReportType
+        in: formData
+        name: report_type
+        type: string
+      - description: FileType
+        in: formData
+        name: file_type
+        type: string
+      - description: tags
+        in: formData
+        name: Tags
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update Document
+      tags:
+      - Document
+  /files/{id}:
+    delete:
+      responses: {}
+      summary: Delete File
+      tags:
+      - File
+    get:
+      responses: {}
+      summary: Get File
+      tags:
+      - File
+  /files/ai/{id}:
+    get:
+      responses: {}
+      summary: Get File AI Analysis
+      tags:
+      - File
+  /files/ocr/{id}:
+    get:
+      responses: {}
+      summary: Get File Text
+      tags:
+      - File
+  /files/upload:
+    post:
+      responses: {}
+      summary: Upload File
+      tags:
+      - File
+  /user-details/ai-credits:
+    get:
+      responses: {}
+      summary: Get AI Credit Usage
+      tags:
+      - User-Details
+  /user-details/update:
+    patch:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Name
+        in: formData
+        name: name
+        type: string
+      - description: DeleteProfilePic
+        in: formData
+        name: delete_profile_pic
+        type: string
+      - description: Date of Birth (YYYY-MM-DD)
+        in: formData
+        name: dob
+        type: string
+      - description: Gender
+        in: formData
+        name: gender
+        type: string
+      - description: Profile Picture
+        in: formData
+        name: profile_pic
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update User Profile
+      tags:
+      - User-Details
+  /user-details/usage:
+    get:
+      responses: {}
+      summary: Get User Usage
+      tags:
+      - User-Details
+  /users/forgot-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Forget Password payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ForgetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Forgot Password
+      tags:
+      - User
+  /users/google:
+    post:
+      responses: {}
+      summary: Google Login
+      tags:
+      - User
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User Login
+      tags:
+      - User
+  /users/reset-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Reset Password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Reset Password
+      tags:
+      - User
+  /users/signup:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Date of Birth (YYYY-MM-DD)
+        in: formData
+        name: dob
+        type: string
+      - description: Gender
+        in: formData
+        name: gender
+        type: string
+      - description: Profile Picture
+        in: formData
+        name: profile_pic
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User Signup
+      tags:
+      - User
+  /users/verify-otp:
+    post:
+      responses: {}
+      summary: Verify OTP
+      tags:
+      - User
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
