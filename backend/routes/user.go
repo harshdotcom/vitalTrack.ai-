@@ -13,7 +13,19 @@ import (
 )
 
 // @Summary User Signup
-// @Router /api/v1/users/signup [post]
+// @Accept multipart/form-data
+// @Produce json
+// @Param email formData string true "Email"
+// @Param password formData string true "Password"
+// @Param name formData string true "Name"
+// @Param dob formData string false "Date of Birth (YYYY-MM-DD)"
+// @Param gender formData string false "Gender"
+// @Param profile_pic formData file false "Profile Picture"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 409 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /users/signup [post]
 func signup(context *gin.Context) {
 	var signupRequest models.SignupRequest
 	err := context.ShouldBind(&signupRequest) //not with JSON as it will be a form data :)
@@ -83,7 +95,7 @@ func signup(context *gin.Context) {
 }
 
 // @Summary User Login
-// @Router /api/v1/users/login [post]
+// @Router /users/login [post]
 func login(context *gin.Context) {
 
 	var loginRequest models.LoginRequest
@@ -132,7 +144,7 @@ func login(context *gin.Context) {
 }
 
 // @Summary Verify OTP
-// @Router /api/v1/users/verify-otp [post]
+// @Router /users/verify-otp [post]
 func verifyOTP(context *gin.Context) {
 
 	var req struct {
@@ -175,7 +187,7 @@ func verifyOTP(context *gin.Context) {
 }
 
 // @Summary Forgot Password
-// @Router /api/v1/users/forgot-password [post]
+// @Router /users/forgot-password [post]
 func forgotPassword(context *gin.Context) {
 	var forgetPasswordRequest models.ForgetPasswordRequest
 	err := context.ShouldBindJSON(&forgetPasswordRequest)
@@ -219,7 +231,7 @@ func forgotPassword(context *gin.Context) {
 }
 
 // @Summary Reset Password
-// @Router /api/v1/users/reset-password [post]
+// @Router /users/reset-password [post]
 func resetPassword(context *gin.Context) {
 	var req models.ResetPasswordRequest
 
@@ -264,7 +276,7 @@ func resetPassword(context *gin.Context) {
 }
 
 // @Summary Google Login
-// @Router /api/v1/users/google [post]
+// @Router /users/google [post]
 func googleLogin(context *gin.Context) {
 	var req models.GoogleLoginRequest
 	err := context.ShouldBindJSON(&req)

@@ -6,77 +6,129 @@ info:
   title: Vita Track AI API
   version: "1.0"
 paths:
-  /api/v1/documents:
+  /documents:
     post:
       responses: {}
       summary: Create Document
-  /api/v1/documents/{id}:
+  /documents/{id}:
     delete:
       responses: {}
       summary: Delete Document
     get:
       responses: {}
       summary: Get Document
-  /api/v1/documents/calendar:
+  /documents/calendar:
     post:
       responses: {}
       summary: Get Calendar Documents
-  /api/v1/documents/update/{id}:
+  /documents/update/{id}:
     patch:
       responses: {}
       summary: Update Document
-  /api/v1/files/{id}:
+  /files/{id}:
     delete:
       responses: {}
       summary: Delete File
     get:
       responses: {}
       summary: Get File
-  /api/v1/files/ai/{id}:
+  /files/ai/{id}:
     get:
       responses: {}
       summary: Get File AI Analysis
-  /api/v1/files/ocr/{id}:
+  /files/ocr/{id}:
     get:
       responses: {}
       summary: Get File Text
-  /api/v1/files/upload:
+  /files/upload:
     post:
       responses: {}
       summary: Upload File
-  /api/v1/user-details/ai-credits:
+  /user-details/ai-credits:
     get:
       responses: {}
       summary: Get AI Credit Usage
-  /api/v1/user-details/update:
+  /user-details/update:
     patch:
       responses: {}
       summary: Update User Profile
-  /api/v1/user-details/usage:
+  /user-details/usage:
     get:
       responses: {}
       summary: Get User Usage
-  /api/v1/users/forgot-password:
+  /users/forgot-password:
     post:
       responses: {}
       summary: Forgot Password
-  /api/v1/users/google:
+  /users/google:
     post:
       responses: {}
       summary: Google Login
-  /api/v1/users/login:
+  /users/login:
     post:
       responses: {}
       summary: User Login
-  /api/v1/users/reset-password:
+  /users/reset-password:
     post:
       responses: {}
       summary: Reset Password
-  /api/v1/users/signup:
+  /users/signup:
     post:
-      responses: {}
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Date of Birth (YYYY-MM-DD)
+        in: formData
+        name: dob
+        type: string
+      - description: Gender
+        in: formData
+        name: gender
+        type: string
+      - description: Profile Picture
+        in: formData
+        name: profile_pic
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
       summary: User Signup
-  /api/v1/users/verify-otp:
+  /users/verify-otp:
     post:
       responses: {}
       summary: Verify OTP

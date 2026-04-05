@@ -15,25 +15,25 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/documents": {
+        "/documents": {
             "post": {
                 "summary": "Create Document",
                 "responses": {}
             }
         },
-        "/api/v1/documents/calendar": {
+        "/documents/calendar": {
             "post": {
                 "summary": "Get Calendar Documents",
                 "responses": {}
             }
         },
-        "/api/v1/documents/update/{id}": {
+        "/documents/update/{id}": {
             "patch": {
                 "summary": "Update Document",
                 "responses": {}
             }
         },
-        "/api/v1/documents/{id}": {
+        "/documents/{id}": {
             "get": {
                 "summary": "Get Document",
                 "responses": {}
@@ -43,25 +43,25 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/api/v1/files/ai/{id}": {
+        "/files/ai/{id}": {
             "get": {
                 "summary": "Get File AI Analysis",
                 "responses": {}
             }
         },
-        "/api/v1/files/ocr/{id}": {
+        "/files/ocr/{id}": {
             "get": {
                 "summary": "Get File Text",
                 "responses": {}
             }
         },
-        "/api/v1/files/upload": {
+        "/files/upload": {
             "post": {
                 "summary": "Upload File",
                 "responses": {}
             }
         },
-        "/api/v1/files/{id}": {
+        "/files/{id}": {
             "get": {
                 "summary": "Get File",
                 "responses": {}
@@ -71,55 +71,131 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/api/v1/user-details/ai-credits": {
+        "/user-details/ai-credits": {
             "get": {
                 "summary": "Get AI Credit Usage",
                 "responses": {}
             }
         },
-        "/api/v1/user-details/update": {
+        "/user-details/update": {
             "patch": {
                 "summary": "Update User Profile",
                 "responses": {}
             }
         },
-        "/api/v1/user-details/usage": {
+        "/user-details/usage": {
             "get": {
                 "summary": "Get User Usage",
                 "responses": {}
             }
         },
-        "/api/v1/users/forgot-password": {
+        "/users/forgot-password": {
             "post": {
                 "summary": "Forgot Password",
                 "responses": {}
             }
         },
-        "/api/v1/users/google": {
+        "/users/google": {
             "post": {
                 "summary": "Google Login",
                 "responses": {}
             }
         },
-        "/api/v1/users/login": {
+        "/users/login": {
             "post": {
                 "summary": "User Login",
                 "responses": {}
             }
         },
-        "/api/v1/users/reset-password": {
+        "/users/reset-password": {
             "post": {
                 "summary": "Reset Password",
                 "responses": {}
             }
         },
-        "/api/v1/users/signup": {
+        "/users/signup": {
             "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
                 "summary": "User Signup",
-                "responses": {}
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Date of Birth (YYYY-MM-DD)",
+                        "name": "dob",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Gender",
+                        "name": "gender",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Profile Picture",
+                        "name": "profile_pic",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
             }
         },
-        "/api/v1/users/verify-otp": {
+        "/users/verify-otp": {
             "post": {
                 "summary": "Verify OTP",
                 "responses": {}

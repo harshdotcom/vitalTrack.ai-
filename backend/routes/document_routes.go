@@ -9,31 +9,31 @@ import (
 )
 
 // @Summary Create Document
-// @Router /api/v1/documents [post]
+// @Router /documents [post]
 func createDocument(c *gin.Context) {
 	service.CreateDocument(c)
 }
 
 // @Summary Get Document
-// @Router /api/v1/documents/{id} [get]
+// @Router /documents/{id} [get]
 func getDocument(c *gin.Context) {
 	service.GetDocument(c)
 }
 
 // @Summary Delete Document
-// @Router /api/v1/documents/{id} [delete]
+// @Router /documents/{id} [delete]
 func deleteDocument(c *gin.Context) {
 	service.DeleteDocument(c)
 }
 
 // @Summary Get Calendar Documents
-// @Router /api/v1/documents/calendar [post]
+// @Router /documents/calendar [post]
 func getCalendarDocuments(c *gin.Context) {
 	service.GetCalendarDocuments(c)
 }
 
 // @Summary Update Document
-// @Router /api/v1/documents/update/{id} [patch]
+// @Router /documents/update/{id} [patch]
 func updateDocument(c *gin.Context) {
 	var updateDocReq models.UpdateDocumentRequest
 	err := c.ShouldBind(&updateDocReq)
