@@ -88,7 +88,17 @@ func signup(context *gin.Context) {
 
 	repository.SaveOTP(&otpModel)
 
-	go utility.SendEmail(user.Email, *otpModel.OTP)
+	err = utility.SendEmail(user.Email, *otpModel.OTP)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Cannot send the email",
+			"error":   err.Error(),
+		})
+
+		return
+
+	}
 
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Signup successful. Please verify OTP sent to your email.",
