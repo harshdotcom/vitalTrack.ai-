@@ -7,6 +7,7 @@ import (
 	"time"
 	"vita-track-ai/models"
 	"vita-track-ai/repository"
+	"vita-track-ai/service"
 	"vita-track-ai/utility"
 
 	"github.com/gin-gonic/gin"
