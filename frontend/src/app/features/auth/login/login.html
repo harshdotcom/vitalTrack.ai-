@@ -5,11 +5,11 @@
                 <span class="logo-icon">+</span>
                 <h1>Vitatrack.ai</h1>
             </div>
-            <h2>Welcome Back</h2>
-            <p>Log in to access your medical journal</p>
+            <h2>{{ isForgotPasswordOpen ? 'Reset Password' : 'Welcome Back' }}</h2>
+            <p>{{ isForgotPasswordOpen ? 'Use your email, OTP, and new password to restore access.' : 'Log in to access your medical journal' }}</p>
         </div>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form" *ngIf="!isForgotPasswordOpen">
 
             <div class="form-group">
                 <label for="email">Email Address</label>
@@ -51,9 +51,14 @@
             </div>
 
             <div class="form-actions">
-                <!-- Error message block -->
                 <div class="api-error" *ngIf="errorMessage">
                     {{ errorMessage }}
+                </div>
+
+                <div class="action-row">
+                    <button type="button" class="text-action" (click)="toggleForgotPassword()">
+                        Forgot password?
+                    </button>
                 </div>
 
                 <button type="submit" class="btn-primary full-width" [disabled]="isLoading">
@@ -64,13 +69,100 @@
 
         </form>
 
+        <section class="forgot-password-panel" *ngIf="isForgotPasswordOpen">
+            <div class="panel-header">
+                <h3>Reset your password</h3>
+                <p>Enter your email first. We'll send an OTP, then you can set a new password.</p>
+            </div>
+
+            <div class="action-row panel-action-row">
+                <button type="button" class="text-action" (click)="toggleForgotPassword()">
+                    Back to login
+                </button>
+            </div>
+
+            <form [formGroup]="forgotPasswordForm" class="forgot-password-form">
+                <div class="form-group">
+                    <label for="reset-email">Email Address</label>
+                    <input id="reset-email" type="email" formControlName="email" placeholder="doctor@example.com"
+                        [class.invalid]="forgotPasswordForm.get('email')?.invalid && forgotPasswordForm.get('email')?.touched">
+                    <div class="error-message"
+                        *ngIf="forgotPasswordForm.get('email')?.invalid && forgotPasswordForm.get('email')?.touched">
+                        <span *ngIf="forgotPasswordForm.get('email')?.hasError('required')">Email is required.</span>
+                        <span *ngIf="forgotPasswordForm.get('email')?.hasError('email')">Please enter a valid email address.</span>
+                    </div>
+                </div>
+
+                <div class="status-message success" *ngIf="forgotPasswordInfo">
+                    {{ forgotPasswordInfo }}
+                </div>
+
+                <div class="api-error" *ngIf="forgotPasswordError">
+                    {{ forgotPasswordError }}
+                </div>
+
+                <button type="button" class="btn-secondary full-width" [disabled]="isForgotPasswordLoading"
+                    (click)="requestPasswordResetOtp()">
+                    <span *ngIf="!isForgotPasswordLoading">{{ isOtpRequested ? 'Resend OTP' : 'Send OTP' }}</span>
+                    <span *ngIf="isForgotPasswordLoading" class="loader dark"></span>
+                </button>
+
+                <div class="reset-fields" *ngIf="isOtpRequested">
+                    <div class="form-group">
+                        <label for="otp">OTP</label>
+                        <input id="otp" type="text" formControlName="otp" placeholder="Enter the OTP from your email"
+                            [class.invalid]="forgotPasswordForm.get('otp')?.invalid && forgotPasswordForm.get('otp')?.touched">
+                        <div class="error-message"
+                            *ngIf="forgotPasswordForm.get('otp')?.invalid && forgotPasswordForm.get('otp')?.touched">
+                            <span *ngIf="forgotPasswordForm.get('otp')?.hasError('required')">OTP is required.</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-password">New Password</label>
+                        <div class="password-input-wrapper">
+                            <input id="new-password" [type]="showNewPassword ? 'text' : 'password'"
+                                formControlName="newPassword" placeholder="Create a new password"
+                                [class.invalid]="forgotPasswordForm.get('newPassword')?.invalid && forgotPasswordForm.get('newPassword')?.touched">
+                            <button type="button" class="password-toggle-btn" (click)="showNewPassword = !showNewPassword">
+                                <svg *ngIf="!showNewPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                <svg *ngIf="showNewPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                                    </path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="error-message"
+                            *ngIf="forgotPasswordForm.get('newPassword')?.invalid && forgotPasswordForm.get('newPassword')?.touched">
+                            <span *ngIf="forgotPasswordForm.get('newPassword')?.hasError('required')">New password is required.</span>
+                            <span *ngIf="forgotPasswordForm.get('newPassword')?.hasError('minlength')">Password must be at least 6 characters.</span>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-primary full-width" [disabled]="isForgotPasswordLoading"
+                        (click)="submitPasswordReset()">
+                        <span *ngIf="!isForgotPasswordLoading">Update Password</span>
+                        <span *ngIf="isForgotPasswordLoading" class="loader"></span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
         <div class="auth-footer">
             <p>Don't have an account? <a routerLink="/signup">Sign up</a></p>
         </div>
     </div>
 
-    <!-- Trademark and Credits -->
     <div class="global-footer">
-        <p>Developed with ❤️ by the ByIITians team.</p>
+        <p>Developed with love by the ByIITians team.</p>
     </div>
 </div>

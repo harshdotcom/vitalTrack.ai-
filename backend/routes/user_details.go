@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 	"vita-track-ai/models"
 	"vita-track-ai/repository"
@@ -101,6 +102,7 @@ func getBaseMonthlyAICredits() int64 {
 
 // @Summary Update User Profile
 // @Tags User-Details
+// @Accept json
 // @Accept multipart/form-data
 // @Produce json
 // @Param name formData string false "Name"
@@ -116,7 +118,14 @@ func getBaseMonthlyAICredits() int64 {
 func updateProfile(context *gin.Context) {
 
 	var updateUserReq models.UpdateUserRequest
-	err := context.ShouldBind(&updateUserReq)
+	contentType := context.ContentType()
+
+	var err error
+	if strings.HasPrefix(contentType, "application/json") {
+		err = context.ShouldBindJSON(&updateUserReq)
+	} else {
+		err = context.ShouldBind(&updateUserReq)
+	}
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
@@ -132,8 +141,22 @@ func updateProfile(context *gin.Context) {
 	userModel, err := service.ManageUserUpdateRequest(updateUserReq, userID)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
+		statusCode := http.StatusInternalServerError
+		if strings.Contains(err.Error(), "name cannot be empty") || strings.Contains(err.Error(), "dob must be in YYYY-MM-DD format") {
+			statusCode = http.StatusBadRequest
+		}
+
+		context.JSON(statusCode, gin.H{
 			"message": "There is a problem in updating the user",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	userResponse, err := service.BuildUserResponse(*userModel)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "There is a problem in preparing the user response",
 			"error":   err.Error(),
 		})
 		return
@@ -141,7 +164,7 @@ func updateProfile(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Update successful",
-		"user":    userModel,
+		"user":    userResponse,
 	})
 
 }

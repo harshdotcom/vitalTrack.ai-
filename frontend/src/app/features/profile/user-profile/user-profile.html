@@ -1,0 +1,303 @@
+<div class="profile-page" *ngIf="user() as currentUser">
+    <header class="profile-header">
+        <div class="header-brand">
+            <span class="logo-icon">+</span>
+            <div>
+                <h1>Vitatrack.ai</h1>
+                <p>Your account profile</p>
+            </div>
+        </div>
+
+        <a routerLink="/dashboard" class="header-link-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18l-6-6 6-6"></path>
+            </svg>
+            <span>Dashboard</span>
+        </a>
+    </header>
+
+    <main class="profile-shell">
+        <section class="profile-hero">
+            <div class="profile-identity">
+                <div class="profile-avatar" *ngIf="!profileImage">{{ initials() }}</div>
+                <img *ngIf="profileImage" [src]="profileImage" [alt]="currentUser.name || currentUser.email" class="profile-avatar-image">
+
+                <div class="profile-summary">
+                    <span class="profile-badge" [class.verified]="currentUser.is_verified">
+                        {{ currentUser.is_verified ? 'Verified account' : 'Verification pending' }}
+                    </span>
+                    <h2>{{ currentUser.name || 'VitalTrack User' }}</h2>
+                    <p>{{ currentUser.email }}</p>
+                </div>
+            </div>
+
+            <div class="hero-actions">
+                <button type="button" class="hero-action hero-action--primary" *ngIf="!isEditing()" (click)="openEditor()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z"></path>
+                    </svg>
+                    <span>Edit profile</span>
+                </button>
+
+                <button type="button" class="hero-action hero-action--secondary" *ngIf="isEditing()" (click)="closeEditor()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m18 6-12 12"></path>
+                        <path d="m6 6 12 12"></path>
+                    </svg>
+                    <span>Close editor</span>
+                </button>
+
+                <a routerLink="/dashboard" class="hero-action hero-action--secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="8" rx="1"></rect>
+                        <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+                        <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+                        <rect x="3" y="15" width="7" height="6" rx="1"></rect>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+
+                <button type="button" class="hero-action hero-action--danger" (click)="logout()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="profile-card" *ngIf="!isEditing()">
+            <div class="card-heading">
+                <h3>Profile overview</h3>
+                <p>Useful account information for identity, access, and support.</p>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21a8 8 0 0 0-16 0"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span>Full name</span>
+                    </span>
+                    <strong>{{ currentUser.name || 'Not added' }}</strong>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16v16H4z"></path>
+                            <path d="m22 6-10 7L2 6"></path>
+                        </svg>
+                        <span>Email</span>
+                    </span>
+                    <strong>{{ currentUser.email }}</strong>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M12 12v9"></path>
+                            <path d="M9 18h6"></path>
+                        </svg>
+                        <span>Gender</span>
+                    </span>
+                    <strong>{{ displayGender }}</strong>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                            <path d="M16 2v4"></path>
+                            <path d="M8 2v4"></path>
+                            <path d="M3 10h18"></path>
+                        </svg>
+                        <span>Date of birth</span>
+                    </span>
+                    <strong>{{ displayDob }}</strong>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                            <path d="M7 8h10"></path>
+                            <path d="M7 12h6"></path>
+                        </svg>
+                        <span>Account ID</span>
+                    </span>
+                    <strong>#{{ currentUser.user_id }}</strong>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 2v4"></path>
+                            <path d="M16 2v4"></path>
+                            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                            <path d="M3 10h18"></path>
+                        </svg>
+                        <span>Signed up on</span>
+                    </span>
+                    <strong>{{ joinedDate }}</strong>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 8v4l3 3"></path>
+                            <circle cx="12" cy="12" r="9"></circle>
+                        </svg>
+                        <span>Last profile update</span>
+                    </span>
+                    <strong>{{ updatedDate }}</strong>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v4"></path>
+                            <path d="M10 14 21 3"></path>
+                            <path d="M21 14v5a2 2 0 0 1-2 2h-5"></path>
+                            <path d="M3 10 14 21"></path>
+                            <path d="M5 3h4"></path>
+                            <path d="M3 5v4"></path>
+                        </svg>
+                        <span>Login method</span>
+                    </span>
+                    <strong>{{ currentUser.google_id ? 'Google' : 'Email and password' }}</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="profile-card" *ngIf="isEditing()">
+            <div class="edit-card-header">
+                <div class="card-heading">
+                    <h3>Edit profile</h3>
+                    <p>Keep your account details current so the app reflects the right identity information.</p>
+                </div>
+
+                <button type="button" class="editor-close-button" (click)="closeEditor(profilePicInput)" [disabled]="isSubmitting()"
+                    aria-label="Close edit profile">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m18 6-12 12"></path>
+                        <path d="m6 6 12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form class="profile-form" [formGroup]="profileForm" (ngSubmit)="saveProfile(profilePicInput)">
+                <div class="profile-form-grid">
+                    <div class="form-field form-field--full">
+                        <label for="name">Full name</label>
+                        <input id="name" type="text" formControlName="name" placeholder="Enter your full name">
+                        <p class="field-error" *ngIf="profileForm.controls.name.invalid && profileForm.controls.name.touched">
+                            Enter a valid name with at least 2 characters.
+                        </p>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="gender">Gender</label>
+                        <select id="gender" formControlName="gender">
+                            <option value="">Prefer not to say</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="dob">Date of birth</label>
+                        <input id="dob" type="date" formControlName="dob">
+                    </div>
+
+                    <div class="form-field form-field--full">
+                        <label for="profile-pic">Profile photo</label>
+                        <div class="photo-controls">
+                            <input #profilePicInput id="profile-pic" type="file" accept="image/*" (change)="onProfilePicSelected($event)">
+                            <div class="photo-meta">
+                                <span *ngIf="selectedFileName(); else currentPhotoState">{{ selectedFileName() }}</span>
+                                <ng-template #currentPhotoState>
+                                    <span>{{ profileImage ? 'Current photo ready' : 'No profile photo uploaded' }}</span>
+                                </ng-template>
+                            </div>
+                        </div>
+
+                        <div class="photo-actions">
+                            <button type="button" class="secondary-button" (click)="clearSelectedImage(profilePicInput)"
+                                [disabled]="!selectedFileName() || isSubmitting()">
+                                Clear selection
+                            </button>
+                            <button type="button" class="secondary-button secondary-button--danger"
+                                (click)="markProfileImageForRemoval(profilePicInput)"
+                                [disabled]="(!profileImage && !selectedFileName()) || isSubmitting()">
+                                Remove current photo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-status" *ngIf="updateError() || updateSuccess()">
+                    <p class="status-message status-message--error" *ngIf="updateError()">{{ updateError() }}</p>
+                    <p class="status-message status-message--success" *ngIf="updateSuccess()">{{ updateSuccess() }}</p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="primary-button" [disabled]="isSubmitting()">
+                        {{ isSubmitting() ? 'Saving profile...' : 'Update profile' }}
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="profile-card account-actions">
+            <div class="card-heading">
+                <h3>Account actions</h3>
+                <p>Quick access to the two most common account tasks.</p>
+            </div>
+
+            <div class="account-actions-row">
+                <a routerLink="/dashboard" class="account-action-tile">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="8" rx="1"></rect>
+                        <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+                        <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+                        <rect x="3" y="15" width="7" height="6" rx="1"></rect>
+                    </svg>
+                    <span>Go to dashboard</span>
+                </a>
+
+                <button type="button" class="account-action-tile account-action-tile--danger" (click)="logout()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </section>
+    </main>
+</div>

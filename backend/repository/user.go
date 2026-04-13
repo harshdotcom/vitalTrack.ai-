@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"time"
 	"vita-track-ai/database"
 	"vita-track-ai/models"
 	"vita-track-ai/utility"
@@ -11,7 +12,7 @@ import (
 
 func GetUserModelByEmail(email string) (models.User, error) {
 	var user models.User
-	tx := database.DB.Where("email = ?", email).First(&user)
+	tx := database.DB.Preload("ProfileImage").Where("email = ?", email).First(&user)
 	err := tx.Error
 
 	return user, err
@@ -19,7 +20,7 @@ func GetUserModelByEmail(email string) (models.User, error) {
 
 func GetUserModelById(id int64) (models.User, error) {
 	var user models.User
-	tx := database.DB.Where("user_id = ?", id).First(&user)
+	tx := database.DB.Preload("ProfileImage").Where("user_id = ?", id).First(&user)
 	err := tx.Error
 
 	return user, err
@@ -43,7 +44,7 @@ func SaveUser(u *models.User) (int64, error) {
 func ValidateCredential(u *models.User) error {
 
 	enteredPassword := u.Password
-	tx := database.DB.Where("email = ?", u.Email).First(u)
+	tx := database.DB.Preload("ProfileImage").Where("email = ?", u.Email).First(u)
 	err := tx.Error
 	if err != nil {
 
@@ -76,7 +77,7 @@ func UpdateGoogleId(u *models.User) error {
 	}
 
 	// After the update, get the User ID (since GORM doesn't support RETURNING like raw SQL)
-	err = database.DB.Where("email = ?", u.Email).First(u).Error
+	err = database.DB.Preload("ProfileImage").Where("email = ?", u.Email).First(u).Error
 
 	return err
 }
@@ -88,18 +89,22 @@ func UpdateGoogleId(u *models.User) error {
 // }
 
 func UpdateUser(userModel *models.User) error {
-	query, err := database.ReadSQLFile("sql/UPDATE_USER.sql")
-	if err != nil {
+	now := time.Now()
+	updates := map[string]interface{}{
+		"name":       userModel.Name,
+		"dob":        userModel.DOB,
+		"gender":     userModel.Gender,
+		"updated_at": now,
+	}
+
+	if err := database.DB.Model(&models.User{}).
+		Where("user_id = ?", userModel.UserId).
+		Updates(updates).Error; err != nil {
 		return err
 	}
 
-	// if userModel.DOB != nil {
-	// 	dobStr := userModel.DOB.Format("2006-01-02")
-	// 	tempDOB, _ := time.Parse("2006-01-02", dobStr)
-	// 	userModel.DOB = &tempDOB
-	// }
-
-	return database.DB.Exec(query, userModel.Name, userModel.DOB, userModel.Gender, userModel.ProfilePic, userModel.IsVerified, userModel.UserId).Error
+	userModel.UpdatedAt = now
+	return nil
 }
 
 func DeleteUserByEmail(email string) error {

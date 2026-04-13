@@ -1,8 +1,9 @@
 package service
 
 import (
-	"mime/multipart"
-	"os"
+	"errors"
+	"strings"
+	"time"
 	"vita-track-ai/models"
 	"vita-track-ai/repository"
 )
@@ -24,68 +25,59 @@ func exceedStorageLimit(userId int64, fileSize int64) (bool, error) {
 	return false, nil
 }
 
-func UploadProfilePicToS3(fileHeader *multipart.FileHeader, email string) (string, error) {
-	storageKey := "profile-pics-" + email
-	err := UploadToS3(fileHeader, storageKey, os.Getenv("AWS_BUCKET_NAME"))
-
-	return storageKey, err
-
-}
-
 func ManageUserUpdateRequest(updateUserReq models.UpdateUserRequest, userId int64) (*models.User, error) {
-	var shouldDeleteProfilePic bool = true
+	var shouldDeleteProfilePic bool
 	userModel, err := repository.GetUserModelById(userId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if updateUserReq.DeleteProfilePic == nil || *updateUserReq.DeleteProfilePic == "false" {
-		shouldDeleteProfilePic = false
+	if updateUserReq.DeleteProfilePic != nil {
+		shouldDeleteProfilePic = *updateUserReq.DeleteProfilePic
 	}
 
 	fileHeader := updateUserReq.ProfilePic
 
-	if fileHeader != nil && shouldDeleteProfilePic == false {
-
-		if userModel.ProfilePic != nil {
-			err = DeleteFileFromS3(*userModel.ProfilePic)
-
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		storageKey := "profile-pics-" + userModel.Email
-		err = UploadToS3(fileHeader, storageKey, os.Getenv("AWS_BUCKET_NAME"))
+	if fileHeader != nil && !shouldDeleteProfilePic {
+		profileImage, err := UploadUserProfileImage(userId, fileHeader)
 		if err != nil {
 			return nil, err
 		}
-
-		// fmt.Printf("The user profile pic is %v", userModel.ProfilePic)
-		userModel.ProfilePic = &storageKey
-	} else if shouldDeleteProfilePic == true {
-
-		if userModel.ProfilePic != nil {
-			err = DeleteFileFromS3(*userModel.ProfilePic)
-			if err != nil {
-				return nil, err
-			}
-		}
-
+		userModel.ProfileImage = profileImage
 		userModel.ProfilePic = nil
+	} else if shouldDeleteProfilePic {
+		if err := DeleteUserProfileImage(userId); err != nil {
+			return nil, err
+		}
+		userModel.ProfilePic = nil
+		userModel.ProfileImage = nil
+		userModel.LegacyProfilePic = nil
 	}
 
 	if updateUserReq.Name != nil {
-		userModel.Name = *updateUserReq.Name
+		trimmedName := strings.TrimSpace(*updateUserReq.Name)
+		if trimmedName == "" {
+			return nil, errors.New("name cannot be empty")
+		}
+		userModel.Name = trimmedName
 	}
 
 	if updateUserReq.DOB != nil {
-		userModel.DOB = updateUserReq.DOB
+		trimmedDOB := strings.TrimSpace(*updateUserReq.DOB)
+		if trimmedDOB == "" {
+			userModel.DOB = nil
+		} else {
+			parsedDOB, err := time.Parse("2006-01-02", trimmedDOB)
+			if err != nil {
+				return nil, errors.New("dob must be in YYYY-MM-DD format")
+			}
+			userModel.DOB = &parsedDOB
+		}
 	}
 
 	if updateUserReq.Gender != nil {
-		userModel.Gender = *updateUserReq.Gender
+		userModel.Gender = strings.TrimSpace(*updateUserReq.Gender)
 	}
 
 	err = repository.UpdateUser(&userModel)

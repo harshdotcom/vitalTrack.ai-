@@ -580,6 +580,51 @@ select {
     background-color: #F3F4F6;
 }
 
+.header-action-button {
+    min-width: 122px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 18px;
+    border-radius: 14px;
+    font-weight: 700;
+    background: #ffffff;
+}
+
+.header-action-button--danger {
+    color: #b91c1c;
+    border-color: #fecaca;
+    background: #fff7f7;
+}
+
+.header-action-button--danger:hover {
+    background: #fee2e2;
+}
+
+.btn-icon-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    width: 46px;
+    height: 46px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid #fecaca !important;
+    background: #fff7f7 !important;
+    color: #b91c1c;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+    box-shadow: none;
+}
+
+.btn-icon-logout:hover {
+    background: #fee2e2 !important;
+    border-color: #fca5a5 !important;
+    transform: none;
+}
+
 .api-error {
     background-color: #FEF2F2;
     border-left: 4px solid var(--error);
@@ -767,6 +812,10 @@ select {
         font-weight: 600;
         border-radius: var(--radius-md);
         white-space: nowrap;
+    }
+
+    .header-action-button {
+        min-width: 0;
     }
 
     .calendar-wrapper {

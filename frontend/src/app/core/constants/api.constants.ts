@@ -28,10 +28,19 @@ export const API_CONSTANTS = {
   get VERIFY_OTP_URL() {
     return `${this.BASE_URL}/users/verify-otp`;
   },
+  get FORGOT_PASSWORD_URL() {
+    return `${this.BASE_URL}/users/forgot-password`;
+  },
+  get RESET_PASSWORD_URL() {
+    return `${this.BASE_URL}/users/reset-password`;
+  },
   get USER_USAGE_URL() {
     return `${this.BASE_URL}/user-details/usage`;
   },
   get AI_CREDITS_URL() {
     return `${this.BASE_URL}/user-details/ai-credits`;
+  },
+  get UPDATE_PROFILE_URL() {
+    return `${this.BASE_URL}/user-details/update`;
   }
 };

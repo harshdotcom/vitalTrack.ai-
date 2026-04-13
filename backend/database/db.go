@@ -57,6 +57,7 @@ func RunSQLFile(path string) error {
 
 func createTables() {
 	createUserTable()
+	createUserProfileImageTable()
 	createUserAICreditGrantTable()
 	createFileTable()
 	createMedicalRecordTable()
@@ -77,6 +78,13 @@ func createUserAICreditGrantTable() {
 	err := DB.AutoMigrate(&models.UserAICreditGrant{})
 	if err != nil {
 		panic("failed to migrate UserAICreditGrant table")
+	}
+}
+
+func createUserProfileImageTable() {
+	err := DB.AutoMigrate(&models.UserProfileImage{})
+	if err != nil {
+		panic("failed to migrate UserProfileImage table")
 	}
 }
 

@@ -251,6 +251,10 @@ export class CalendarDashboard implements OnInit {
     this.router.navigate(['/login']);
   }
 
+  goToProfile() {
+    this.router.navigate(['/profile']);
+  }
+
   fetchStorageUsage() {
     this.authService.getUserUsage().subscribe({
       next: (res) => {

@@ -14,6 +14,10 @@ import (
 
 var S3Client *s3.Client
 
+func defaultBucketName() string {
+	return os.Getenv("AWS_BUCKET_NAME")
+}
+
 func InitS3() {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
@@ -50,11 +54,19 @@ func UploadToS3(file *multipart.FileHeader, key string, bucket string) error {
 	}
 	defer src.Close()
 
-	_, err = S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+	contentType := file.Header.Get("Content-Type")
+
+	input := &s3.PutObjectInput{
 		Bucket: &bucket,
 		Key:    &key,
 		Body:   src,
-	})
+	}
+
+	if contentType != "" {
+		input.ContentType = aws.String(contentType)
+	}
+
+	_, err = S3Client.PutObject(context.TODO(), input)
 
 	return err
 }
@@ -62,7 +74,7 @@ func UploadToS3(file *multipart.FileHeader, key string, bucket string) error {
 func DeleteFileFromS3(storageKey string) error {
 
 	_, err := S3Client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
-		Bucket: aws.String(os.Getenv("AWS_BUCKET_NAME")),
+		Bucket: aws.String(defaultBucketName()),
 		Key:    aws.String(storageKey),
 	})
 
