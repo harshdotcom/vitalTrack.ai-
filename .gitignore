@@ -1,5 +1,2 @@
 backend/.env
 .idea
-backend/docs/swagger.yaml
-backend/docs/swagger.json
-backend/docs/docs.go
