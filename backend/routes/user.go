@@ -3,7 +3,9 @@ package routes
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
 	"time"
 	"vita-track-ai/models"
 	"vita-track-ai/repository"
@@ -12,6 +14,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+func isEmailDisabled() bool {
+	return os.Getenv("DISABLE_EMAIL_FLOW") == "true"
+}
 
 // @Summary User Signup
 // @Tags User
@@ -92,6 +98,22 @@ func signup(context *gin.Context) {
 		}
 	}
 
+	// When email flow is disabled, auto-verify the user and skip OTP entirely.
+	if isEmailDisabled() {
+		if verifyErr := repository.MakeUserVerified(user.Email); verifyErr != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"message": "User created but could not auto-verify",
+				"error":   verifyErr.Error(),
+			})
+			return
+		}
+		context.JSON(http.StatusOK, gin.H{
+			"message":       "Signup successful. Email verification is disabled — you can log in directly.",
+			"email_enabled": false,
+		})
+		return
+	}
+
 	// 🔹 Generate OTP
 	otpModel := utility.GenerateOTP()
 	otpModel.Id = userId
@@ -112,7 +134,8 @@ func signup(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"message": "Signup successful. Please verify OTP sent to your email.",
+		"message":       "Signup successful. Please verify OTP sent to your email.",
+		"email_enabled": true,
 	})
 }
 
@@ -139,6 +162,8 @@ func login(context *gin.Context) {
 		return
 	}
 
+	fmt.Printf("[LOGIN] Attempt — email: %s\n", loginRequest.Email)
+
 	var user models.User
 	user.Email = loginRequest.Email
 	user.Password = &loginRequest.Password
@@ -146,6 +171,7 @@ func login(context *gin.Context) {
 	err = repository.ValidateCredential(&user) //user struct gets updated with db values here
 
 	if err != nil {
+		fmt.Printf("[LOGIN] ValidateCredential failed — email: %s | error: %s\n", loginRequest.Email, err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 			"error":   err.Error(),
@@ -153,6 +179,8 @@ func login(context *gin.Context) {
 
 		return
 	}
+
+	fmt.Printf("[LOGIN] Credential valid — email: %s | is_verified: %v\n", user.Email, user.IsVerified)
 
 	token, err := utility.GenerateToken(user.Email, user.UserId)
 
@@ -236,6 +264,13 @@ func verifyOTP(context *gin.Context) {
 // @Failure 500 {object} map[string]interface{}
 // @Router /users/forgot-password [post]
 func forgotPassword(context *gin.Context) {
+	if isEmailDisabled() {
+		context.JSON(http.StatusServiceUnavailable, gin.H{
+			"message": "Password reset via email is currently disabled.",
+		})
+		return
+	}
+
 	var forgetPasswordRequest models.ForgetPasswordRequest
 	err := context.ShouldBindJSON(&forgetPasswordRequest)
 

@@ -2,6 +2,8 @@ package repository
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"time"
 	"vita-track-ai/database"
 	"vita-track-ai/models"
@@ -44,6 +46,7 @@ func SaveUser(u *models.User) (int64, error) {
 func ValidateCredential(u *models.User) error {
 
 	enteredPassword := u.Password
+	fmt.Println(enteredPassword, "printing the added password")
 	tx := database.DB.Preload("ProfileImage").Where("email = ?", u.Email).First(u)
 	err := tx.Error
 	if err != nil {
@@ -61,7 +64,7 @@ func ValidateCredential(u *models.User) error {
 		return errors.New("Entered Password is Incorrect")
 	}
 
-	if u.IsVerified == false {
+	if !u.IsVerified && os.Getenv("DISABLE_EMAIL_FLOW") != "true" {
 		return errors.New("User is not verified")
 	}
 

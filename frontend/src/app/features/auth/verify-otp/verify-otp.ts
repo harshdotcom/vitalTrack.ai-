@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { ToastService } from '../../../core/services/toast';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-verify-otp',
@@ -36,6 +37,10 @@ export class VerifyOtp implements OnInit, OnDestroy {
   private timerInterval: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit(): void {
+    if (!environment.emailVerificationEnabled) {
+      this.router.navigate(['/login']);
+      return;
+    }
     this.email = this.route.snapshot.queryParamMap.get('email') ?? '';
     this.password = history.state?.password || '';
     // Start the initial 60-second cooldown immediately (OTP was just sent on signup)

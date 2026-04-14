@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { ToastService } from '../../../core/services/toast';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-signup',
@@ -46,15 +47,21 @@ export class Signup {
     const userData = this.signupForm.getRawValue();
 
     this.authService.signup(userData).subscribe({
-      next: (response) => {
-        console.log('Signup successful', response);
-        this.toastService.showSuccess('Account created! Please check your email for an OTP.');
-        this.router.navigate(['/verify-otp'], { 
-          queryParams: { email: userData.email },
-          state: { password: userData.password }
-        });
+      next: (_response) => {
         this.isLoading = false;
         this.cdr.detectChanges();
+        if (environment.emailVerificationEnabled) {
+          this.toastService.showSuccess('Account created! Please check your email for an OTP.');
+          this.router.navigate(['/verify-otp'], {
+            queryParams: { email: userData.email },
+            state: { password: userData.password }
+          });
+        } else {
+          this.toastService.showSuccess('Account created! You can now log in.');
+          this.router.navigate(['/login'], {
+            state: { email: userData.email, password: userData.password }
+          });
+        }
       },
       error: (err) => {
         console.error('Signup Error:', err);

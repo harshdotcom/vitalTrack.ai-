@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"vita-track-ai/database"
@@ -32,7 +33,22 @@ func main() {
 	service.InitS3()
 
 	// Create server
-	server := gin.Default()
+	server := gin.New()
+	server.Use(gin.Recovery())
+	server.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+		statusColor := param.StatusCodeColor()
+		methodColor := param.MethodColor()
+		resetColor := param.ResetColor()
+
+		return fmt.Sprintf("[GIN] %s | %s%3d%s | %12v | %s | %s%-7s%s %s\n",
+			param.TimeStamp.Format("2006/01/02 - 15:04:05"),
+			statusColor, param.StatusCode, resetColor,
+			param.Latency,
+			param.ClientIP,
+			methodColor, param.Method, resetColor,
+			param.Path,
+		)
+	}))
 
 	// =========================
 	// CORS CONFIGURATION

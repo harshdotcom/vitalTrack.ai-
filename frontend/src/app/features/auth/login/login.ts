@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { ToastService } from '../../../core/services/toast';
 import { finalize } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -29,6 +30,8 @@ export class Login implements OnInit {
     otp: ['', [Validators.required]],
     newPassword: ['', [Validators.required, Validators.minLength(6)]]
   });
+
+  readonly emailVerificationEnabled = environment.emailVerificationEnabled;
 
   isLoading = false;
   isForgotPasswordOpen = false;
