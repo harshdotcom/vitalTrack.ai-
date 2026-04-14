@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"time"
 	"vita-track-ai/models"
 	"vita-track-ai/service"
 
@@ -43,6 +44,7 @@ func getCalendarDocuments(c *gin.Context) {
 // @Param id path string true "Document ID"
 // @Param category formData string false "Category"
 // @Param document_name formData string false "DocumentName"
+// @Param document_date formData string false "DocumentDate (YYYY-MM-DD)"
 // @Param Tags formData string false "tags"
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -64,6 +66,16 @@ func updateDocument(c *gin.Context) {
 
 	userID := c.MustGet("user_id").(int64)
 	documentId := c.Param("id")
+
+	if updateDocReq.DocumentDate != nil {
+		_, err = time.Parse("2006-01-02", *updateDocReq.DocumentDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "invalid document_date format (use YYYY-MM-DD)",
+			})
+			return
+		}
+	}
 
 	err = service.UpdateDocument(userID, documentId, &updateDocReq)
 

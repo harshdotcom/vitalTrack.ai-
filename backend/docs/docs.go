@@ -72,6 +72,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "DocumentDate (YYYY-MM-DD)",
+                        "name": "document_date",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
                         "description": "tags",
                         "name": "Tags",
                         "in": "formData"

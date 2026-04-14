@@ -26,4 +26,5 @@ type UpdateDocumentRequest struct {
 	Category     *string `form:"category"`
 	DocumentName *string `form:"document_name"`
 	Tags         *string `form:"tags"`
+	DocumentDate *string `form:"document_date"`
 }

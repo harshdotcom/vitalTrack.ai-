@@ -104,6 +104,13 @@ func UpdateDocument(userID int64, documentId string, updateDocReq *models.Update
 		i++
 	}
 
+	if updateDocReq.DocumentDate != nil {
+		parsedDate, _ := time.Parse("2006-01-02", *updateDocReq.DocumentDate)
+		query += fmt.Sprintf("document_date = $%d, ", i)
+		args = append(args, parsedDate)
+		i++
+	}
+
 	// ❗ If no fields provided, avoid executing invalid query
 	if len(args) == 0 {
 		return nil // or return error like "nothing to update"

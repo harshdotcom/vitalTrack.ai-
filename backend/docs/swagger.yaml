@@ -79,6 +79,10 @@ paths:
         in: formData
         name: document_name
         type: string
+      - description: DocumentDate (YYYY-MM-DD)
+        in: formData
+        name: document_date
+        type: string
       - description: tags
         in: formData
         name: Tags
