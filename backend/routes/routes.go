@@ -22,6 +22,7 @@ func RegisterRoutes(server *gin.Engine) {
 	registerFileRoutes(protected)
 	registerDocumentRoutes(protected)
 	registerUserDetailRoutes(protected)
+	registerDailyHealthMetricRoute(protected)
 }
 
 func registerUserRoutes(rg *gin.RouterGroup) {
@@ -65,6 +66,14 @@ func registerUserDetailRoutes(rg *gin.RouterGroup) {
 		userDetails.GET("/usage", getUserUsage)
 		userDetails.GET("/ai-credits", getAICreditUsage)
 		userDetails.PATCH("/update", updateProfile)
+	}
+
+}
+
+func registerDailyHealthMetricRoute(rg *gin.RouterGroup) {
+	healthMetric := rg.Group("/health-metric")
+	{
+		healthMetric.POST("/save", saveHealthMetric)
 	}
 
 }
