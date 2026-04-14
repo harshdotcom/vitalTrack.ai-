@@ -42,7 +42,7 @@ func getCalendarDocuments(c *gin.Context) {
 // @Accept multipart/form-data
 // @Produce json
 // @Param id path string true "Document ID"
-// @Param category formData string false "Category"
+// @Param category formData string false "Category [Prescription or Medical Report]"
 // @Param document_name formData string false "DocumentName"
 // @Param document_date formData string false "DocumentDate (YYYY-MM-DD)"
 // @Param Tags formData string false "tags"
