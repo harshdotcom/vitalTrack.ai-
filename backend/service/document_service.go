@@ -16,7 +16,7 @@ type CreateDocumentRequest struct {
 	Category     string   `json:"category" binding:"required"`
 	DocumentName string   `json:"document_name" binding:"required"`
 	Tags         []string `json:"tags"`
-	ReportDate   string   `json:"report_date"` // ⭐ ADD THIS
+	Date         string   `json:"document_date"` // ⭐ ADD THIS
 }
 
 func CreateDocument(c *gin.Context) {
@@ -43,18 +43,18 @@ func CreateDocument(c *gin.Context) {
 	userID := c.MustGet("user_id").(int64)
 	var parsedDate time.Time
 
-	if req.ReportDate != "" {
+	if req.Date != "" {
 		var err error
-		parsedDate, err = time.Parse("2006-01-02", req.ReportDate)
+		parsedDate, err = time.Parse("2006-01-02", req.Date)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "invalid report_date format (use YYYY-MM-DD)",
+				"error": "invalid document_date format (use YYYY-MM-DD)",
 			})
 			return
 		}
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "report_date is required",
+			"error": "document_date is required",
 		})
 		return
 	}
@@ -66,7 +66,7 @@ func CreateDocument(c *gin.Context) {
 		DocumentName: req.DocumentName,
 		Tags:         string(tagsJSON),
 		Status:       "uploaded",
-		ReportDate:   parsedDate,
+		DocumentDate: parsedDate,
 	}
 
 	if err := repository.CreateDocument(&doc); err != nil {
@@ -128,7 +128,7 @@ func GetCalendarDocuments(c *gin.Context) {
 
 	docs, err := repository.GetDocumentsByMonth(userID, req)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "failed"})
+		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -137,7 +137,7 @@ func GetCalendarDocuments(c *gin.Context) {
 
 	for _, doc := range docs {
 
-		date := doc.ReportDate.Format("2006-01-02")
+		date := doc.DocumentDate.Format("2006-01-02")
 
 		if _, exists := days[date]; !exists {
 			days[date] = gin.H{

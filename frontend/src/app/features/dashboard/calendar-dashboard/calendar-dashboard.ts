@@ -61,7 +61,7 @@ export class CalendarDashboard implements OnInit {
     document_name: ['', Validators.required],
     file_type: ['lab_report', Validators.required],
     tags: [''], // user will input comma separated values
-    report_date: ['', Validators.required]
+    document_date: ['', Validators.required]
   });
 
   // Storage State
@@ -107,7 +107,7 @@ export class CalendarDashboard implements OnInit {
 
   ngOnInit() {
     this.uploadForm.patchValue({
-      report_date: this.formatDateForApi(new Date())
+      document_date: this.formatDateForApi(new Date())
     });
     this.generateCalendar();
     this.fetchMonthData();
@@ -298,7 +298,7 @@ export class CalendarDashboard implements OnInit {
     this.uploadForm.reset({
       category: 'general',
       file_type: 'lab_report',
-      report_date: this.formatDateForApi(new Date())
+      document_date: this.formatDateForApi(new Date())
     });
   }
 

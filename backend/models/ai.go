@@ -32,13 +32,13 @@ Do NOT include markdown.
 Do NOT include explanations outside JSON.
 Do NOT provide diagnosis or medications.
 If data is missing, use null.
-If report_date is available, return it in the format DD-MM-YYYY
+If document_date is available, return it in the format DD-MM-YYYY
 
 Follow this exact JSON structure to produce JSON String:
 
 {
   "report_metadata": {
-    "report_date": "",
+    "document_date": "",
     "report_type": "",
     "hospital_or_lab_name": ""
   },

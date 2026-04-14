@@ -67,7 +67,7 @@ func GetDocumentsByMonth(userID int64, req models.CalendarRequest) ([]models.Doc
 		`).
 		Joins("LEFT JOIN medical_report_dbs ON medical_report_dbs.id = documents.id").
 		Where("documents.user_id = ?", userID).
-		Where("documents.report_date >= ? AND documents.report_date < ?", start, end)
+		Where("documents.document_date >= ? AND documents.document_date < ?", start, end)
 
 	if req.Category != "" {
 		query = query.Where("documents.category = ?", req.Category)

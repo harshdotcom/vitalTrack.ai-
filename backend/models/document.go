@@ -11,7 +11,7 @@ type Document struct {
 	DocumentName      string    `json:"document_name"`
 	Tags              string    `json:"tags"` // JSON string
 	Status            string    `json:"status"`
-	ReportDate        time.Time `json:"report_date"`
+	DocumentDate      time.Time `json:"document_date"`
 	AnalysisGenerated bool      `json:"analysis_generated" gorm:"column:analysis_generated;->;-:migration"`
 }
 

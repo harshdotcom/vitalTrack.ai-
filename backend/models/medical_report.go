@@ -108,7 +108,7 @@ type Recommendations struct {
 }
 
 type ReportMetadata struct {
-	ReportDate    string `json:"report_date"`
+	Date          string `json:"document_date"`
 	ReportType    string `json:"report_type"`
 	HospitalOrLab string `json:"hospital_or_lab_name"`
 }
