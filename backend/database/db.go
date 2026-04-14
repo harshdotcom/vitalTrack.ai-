@@ -64,6 +64,7 @@ func createTables() {
 	createDocumentTable()
 	createUserStorageMV()
 	createOTPTable()
+	createHealthMetricTable()
 }
 
 func createUserTable() {
@@ -106,6 +107,13 @@ func createMedicalRecordTable() {
 	err := DB.AutoMigrate(&models.MedicalReportDB{})
 	if err != nil {
 		panic("failed to migrate Document table")
+	}
+}
+
+func createHealthMetricTable() {
+	err := DB.AutoMigrate(&models.DailyHealthMetric{})
+	if err != nil {
+		panic("failed to migrate Health Metric table")
 	}
 }
 

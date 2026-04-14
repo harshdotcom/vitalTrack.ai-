@@ -60,7 +60,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Category",
+                        "description": "Category [Prescription or Medical Report]",
                         "name": "category",
                         "in": "formData"
                     },
@@ -165,6 +165,60 @@ const docTemplate = `{
                 ],
                 "summary": "Delete File",
                 "responses": {}
+            }
+        },
+        "/health-metric/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new health metric entry for the logged-in user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Save health metric",
+                "parameters": [
+                    {
+                        "description": "Health metric payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SaveHealthMetricRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "health metric saved successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
             }
         },
         "/user-details/ai-credits": {
@@ -563,6 +617,18 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Measurement": {
+            "type": "object",
+            "properties": {
+                "unit": {
+                    "description": "e.g. \"kg\", \"lb\", \"mg/dL\", \"mmol/L\"",
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
         "models.ResetPasswordRequest": {
             "type": "object",
             "required": [
@@ -580,6 +646,57 @@ const docTemplate = `{
                 },
                 "otp": {
                     "type": "string"
+                }
+            }
+        },
+        "models.SaveHealthMetricRequest": {
+            "type": "object",
+            "properties": {
+                "blood_pressure": {
+                    "type": "object",
+                    "properties": {
+                        "diastolic": {
+                            "type": "integer",
+                            "example": 80
+                        },
+                        "systolic": {
+                            "type": "integer",
+                            "example": 120
+                        }
+                    }
+                },
+                "blood_sugar": {
+                    "$ref": "#/definitions/models.Measurement"
+                },
+                "calories": {
+                    "description": "kcal burned/consumed",
+                    "type": "integer",
+                    "example": 2200
+                },
+                "heart_rate": {
+                    "type": "integer",
+                    "example": 72
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "oxygen_level": {
+                    "description": "SpO2 (%)",
+                    "type": "number",
+                    "example": 98
+                },
+                "sleep_hours": {
+                    "description": "hours (e.g., 7.5)",
+                    "type": "number",
+                    "example": 7.5
+                },
+                "steps": {
+                    "description": "daily steps",
+                    "type": "integer",
+                    "example": 8500
+                },
+                "weight": {
+                    "$ref": "#/definitions/models.Measurement"
                 }
             }
         }

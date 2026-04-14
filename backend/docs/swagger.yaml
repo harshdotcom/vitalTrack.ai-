@@ -17,6 +17,14 @@ definitions:
     - email
     - password
     type: object
+  models.Measurement:
+    properties:
+      unit:
+        description: e.g. "kg", "lb", "mg/dL", "mmol/L"
+        type: string
+      value:
+        type: number
+    type: object
   models.ResetPasswordRequest:
     properties:
       email:
@@ -30,6 +38,43 @@ definitions:
     - email
     - new_password
     - otp
+    type: object
+  models.SaveHealthMetricRequest:
+    properties:
+      blood_pressure:
+        properties:
+          diastolic:
+            example: 80
+            type: integer
+          systolic:
+            example: 120
+            type: integer
+        type: object
+      blood_sugar:
+        $ref: '#/definitions/models.Measurement'
+      calories:
+        description: kcal burned/consumed
+        example: 2200
+        type: integer
+      heart_rate:
+        example: 72
+        type: integer
+      notes:
+        type: string
+      oxygen_level:
+        description: SpO2 (%)
+        example: 98
+        type: number
+      sleep_hours:
+        description: hours (e.g., 7.5)
+        example: 7.5
+        type: number
+      steps:
+        description: daily steps
+        example: 8500
+        type: integer
+      weight:
+        $ref: '#/definitions/models.Measurement'
     type: object
 host: localhost:8081
 info:
@@ -71,7 +116,7 @@ paths:
         name: id
         required: true
         type: string
-      - description: Category
+      - description: Category [Prescription or Medical Report]
         in: formData
         name: category
         type: string
@@ -139,6 +184,41 @@ paths:
       summary: Upload File
       tags:
       - File
+  /health-metric/save:
+    post:
+      consumes:
+      - application/json
+      description: Create a new health metric entry for the logged-in user
+      parameters:
+      - description: Health metric payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveHealthMetricRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: health metric saved successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Save health metric
+      tags:
+      - Health
   /user-details/ai-credits:
     get:
       responses: {}
