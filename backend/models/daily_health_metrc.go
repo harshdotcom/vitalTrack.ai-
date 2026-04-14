@@ -22,8 +22,8 @@ type DailyHealthMetric struct {
 }
 
 type Measurement struct {
-	Value float64
-	Unit  string // e.g. "kg", "lb", "mg/dL", "mmol/L"
+	Value float64 `json:"value"`
+	Unit  string  `json:"unit"` // e.g. "kg", "lb", "mg/dL", "mmol/L"
 }
 
 type BloodPressure struct {
@@ -58,20 +58,20 @@ func (d *DailyHealthMetric) Validate() error {
 }
 
 type SaveHealthMetricRequest struct {
-	HeartRate *int         `json:"heart_rate"`
+	HeartRate *int         `json:"heart_rate" example:"72"`
 	Weight    *Measurement `json:"weight"`
 
 	BloodPressure *struct {
-		Systolic  int `json:"systolic"`
-		Diastolic int `json:"diastolic"`
+		Systolic  int `json:"systolic" example:"120"`
+		Diastolic int `json:"diastolic" example:"80"`
 	} `json:"blood_pressure"`
 
 	BloodSugar *Measurement `json:"blood_sugar"`
 
-	SleepHours  *float64 `json:"sleep_hours"`  // hours (e.g., 7.5)
-	Steps       *int     `json:"steps"`        // daily steps
-	Calories    *int     `json:"calories"`     // kcal burned/consumed
-	OxygenLevel *float64 `json:"oxygen_level"` // SpO2 (%)
+	SleepHours  *float64 `json:"sleep_hours" example:"7.5"` // hours (e.g., 7.5)
+	Steps       *int     `json:"steps" example:"8500"`      // daily steps
+	Calories    *int     `json:"calories" example:"2200"`   // kcal burned/consumed
+	OxygenLevel *float64 `json:"oxygen_level" example:"98"` // SpO2 (%)
 
 	Notes *string `json:"notes"`
 }

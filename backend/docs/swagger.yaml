@@ -23,7 +23,6 @@ definitions:
         description: e.g. "kg", "lb", "mg/dL", "mmol/L"
         type: string
       value:
-        format: float64
         type: number
     type: object
   models.ResetPasswordRequest:
@@ -45,27 +44,34 @@ definitions:
       blood_pressure:
         properties:
           diastolic:
+            example: 80
             type: integer
           systolic:
+            example: 120
             type: integer
         type: object
       blood_sugar:
         $ref: '#/definitions/models.Measurement'
       calories:
         description: kcal burned/consumed
+        example: 2200
         type: integer
       heart_rate:
+        example: 72
         type: integer
       notes:
         type: string
       oxygen_level:
         description: SpO2 (%)
+        example: 98
         type: number
       sleep_hours:
         description: hours (e.g., 7.5)
+        example: 7.5
         type: number
       steps:
         description: daily steps
+        example: 8500
         type: integer
       weight:
         $ref: '#/definitions/models.Measurement'
@@ -178,7 +184,7 @@ paths:
       summary: Upload File
       tags:
       - File
-  /health-metrics:
+  /health-metric/save:
     post:
       consumes:
       - application/json

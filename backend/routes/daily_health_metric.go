@@ -18,7 +18,7 @@ import (
 // @Success 201 {object} map[string]interface{} "health metric saved successfully"
 // @Failure 400 {object} map[string]interface{} "invalid request"
 // @Failure 500 {object} map[string]interface{} "internal server error"
-// @Router /health-metrics [post]
+// @Router /health-metric/save [post]
 func saveHealthMetric(c *gin.Context) {
 	userID := c.MustGet("user_id").(int64)
 	var req models.SaveHealthMetricRequest

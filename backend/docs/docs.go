@@ -167,7 +167,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/health-metrics": {
+        "/health-metric/save": {
             "post": {
                 "security": [
                     {
@@ -625,8 +625,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "value": {
-                    "type": "number",
-                    "format": "float64"
+                    "type": "number"
                 }
             }
         },
@@ -657,10 +656,12 @@ const docTemplate = `{
                     "type": "object",
                     "properties": {
                         "diastolic": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 80
                         },
                         "systolic": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 120
                         }
                     }
                 },
@@ -669,25 +670,30 @@ const docTemplate = `{
                 },
                 "calories": {
                     "description": "kcal burned/consumed",
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 2200
                 },
                 "heart_rate": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 72
                 },
                 "notes": {
                     "type": "string"
                 },
                 "oxygen_level": {
                     "description": "SpO2 (%)",
-                    "type": "number"
+                    "type": "number",
+                    "example": 98
                 },
                 "sleep_hours": {
                     "description": "hours (e.g., 7.5)",
-                    "type": "number"
+                    "type": "number",
+                    "example": 7.5
                 },
                 "steps": {
                     "description": "daily steps",
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 8500
                 },
                 "weight": {
                     "$ref": "#/definitions/models.Measurement"
