@@ -368,6 +368,56 @@ func resetPassword(context *gin.Context) {
 	})
 }
 
+// @Summary Resend OTP
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body object true "Email payload"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /users/resend-otp [post]
+func resendOTP(context *gin.Context) {
+	var req struct {
+		Email string `json:"email" binding:"required"`
+	}
+
+	if err := context.ShouldBindJSON(&req); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Email is required"})
+		return
+	}
+
+	user, err := repository.GetUserModelByEmail(req.Email)
+	if err != nil {
+		context.JSON(http.StatusNotFound, gin.H{"message": "No account found with this email"})
+		return
+	}
+
+	if user.IsVerified {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "This account is already verified"})
+		return
+	}
+
+	// Delete existing OTP (if any) and generate a fresh one
+	repository.DeleteOTPByEmail(req.Email)
+
+	otpModel := utility.GenerateOTP()
+	otpModel.Id = user.UserId
+	otpModel.Email = user.Email
+
+	if err := repository.SaveOTP(&otpModel); err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to generate OTP"})
+		return
+	}
+
+	go utility.SendEmail(user.Email, *otpModel.OTP)
+
+	context.JSON(http.StatusOK, gin.H{
+		"message": "A new OTP has been sent to your email.",
+	})
+}
+
 // @Summary Google Login
 // @Tags User
 // @Router /users/google [post]

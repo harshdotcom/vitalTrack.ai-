@@ -30,6 +30,7 @@ func registerUserRoutes(rg *gin.RouterGroup) {
 	{
 		users.POST("/signup", signup)
 		users.POST("/verify-otp", verifyOTP)
+		users.POST("/resend-otp", resendOTP)
 		users.POST("/login", login)
 		users.POST("/google", googleLogin)
 		users.POST("/forgot-password", forgotPassword)

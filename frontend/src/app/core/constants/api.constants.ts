@@ -31,6 +31,9 @@ export const API_CONSTANTS = {
   get VERIFY_OTP_URL() {
     return `${this.BASE_URL}/users/verify-otp`;
   },
+  get RESEND_OTP_URL() {
+    return `${this.BASE_URL}/users/resend-otp`;
+  },
   get FORGOT_PASSWORD_URL() {
     return `${this.BASE_URL}/users/forgot-password`;
   },

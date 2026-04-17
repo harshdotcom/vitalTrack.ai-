@@ -109,17 +109,21 @@ export class VerifyOtp implements OnInit, OnDestroy {
     this.isResending = true;
     this.errorMessage = '';
 
-    // Re-use signup flow is not possible here directly, so we'll call
-    // a dedicated resend endpoint if available; for now we show guidance.
-    // If your backend has a resend endpoint, swap this stub with the real call.
-    // --- stub start ---
-    setTimeout(() => {
-      this.isResending = false;
-      this.toastService.showSuccess('A new OTP has been sent to your email.');
-      this.startRetryTimer();
-      this.cdr.detectChanges();
-    }, 800);
-    // --- stub end ---
+    this.authService.resendOTP(this.email).subscribe({
+      next: () => {
+        this.isResending = false;
+        this.toastService.showSuccess('A new OTP has been sent to your email.');
+        this.startRetryTimer();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isResending = false;
+        const errMsg = err.error?.message || 'Failed to resend OTP. Please try again.';
+        this.errorMessage = errMsg;
+        this.toastService.showError(errMsg);
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   goToLogin(): void {

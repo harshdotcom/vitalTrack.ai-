@@ -61,6 +61,10 @@ export class AuthService {
     return this.http.post(API_CONSTANTS.VERIFY_OTP_URL, { email, otp });
   }
 
+  resendOTP(email: string): Observable<any> {
+    return this.http.post(API_CONSTANTS.RESEND_OTP_URL, { email });
+  }
+
   forgotPassword(email: string): Observable<any> {
     return this.http.post(API_CONSTANTS.FORGOT_PASSWORD_URL, { email });
   }
