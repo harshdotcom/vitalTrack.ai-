@@ -74,6 +74,7 @@ func registerDailyHealthMetricRoute(rg *gin.RouterGroup) {
 	healthMetric := rg.Group("/health-metric")
 	{
 		healthMetric.POST("/save", saveHealthMetric)
+		healthMetric.DELETE("/:id", deleteHealthMetric)
 	}
 
 }

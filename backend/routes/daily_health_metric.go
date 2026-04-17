@@ -37,11 +37,29 @@ func saveHealthMetric(c *gin.Context) {
 		c.JSON(500, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	// Success response
 	c.JSON(201, gin.H{
 		"message": "health metric saved successfully",
 		"data":    metric,
+	})
+}
+
+func deleteHealthMetric(c *gin.Context) {
+	userID := c.MustGet("user_id").(int64)
+	metricID := c.Param("id")
+
+	err := service.DeleteHealthMetric(metricID, userID)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"message": "health metric deleted successfully",
 	})
 }

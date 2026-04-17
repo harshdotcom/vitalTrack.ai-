@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { ThemeToggleComponent } from '../../../core/components/theme-toggle/theme-toggle';
 
 interface Metric {
   test_name: string;
@@ -30,7 +31,7 @@ interface AnalysisData {
 @Component({
   selector: 'app-ai-analysis-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ThemeToggleComponent],
   templateUrl: './ai-analysis-page.html',
   styleUrl: './ai-analysis-page.css',
 })

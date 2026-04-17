@@ -24,6 +24,20 @@ export class DocumentService {
     return this.http.post(API_CONSTANTS.DOCUMENTS_URL, details);
   }
 
+  updateDocument(id: string, payload: any): Observable<any> {
+    let formData = new FormData();
+    if (payload instanceof FormData) {
+      formData = payload;
+    } else {
+      Object.keys(payload).forEach(key => {
+        if (payload[key] !== null && payload[key] !== undefined) {
+          formData.append(key, payload[key]);
+        }
+      });
+    }
+    return this.http.patch(`${API_CONSTANTS.UPDATE_DOCUMENT_URL}/${id}`, formData);
+  }
+
   getDocumentDetails(id: string): Observable<any> {
     return this.http.get(`${API_CONSTANTS.DOCUMENTS_URL}/${id}`);
   }
@@ -36,7 +50,15 @@ export class DocumentService {
     return this.http.delete(`${API_CONSTANTS.FILE_URL}/${id}`);
   }
 
+  deleteHealthMetric(id: string): Observable<any> {
+    return this.http.delete(`${API_CONSTANTS.HEALTH_METRIC_URL}/${id}`);
+  }
+
   getAiAnalysis(fileId: string): Observable<any> {
     return this.http.get(`${API_CONSTANTS.FILES_AI_URL}/${fileId}`);
+  }
+
+  saveHealthMetric(payload: any): Observable<any> {
+    return this.http.post(API_CONSTANTS.HEALTH_METRIC_SAVE_URL, payload);
   }
 }

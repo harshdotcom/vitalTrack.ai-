@@ -2,9 +2,9 @@
     min-height: 100vh;
     padding: 32px 24px 48px;
     background:
-        radial-gradient(circle at top left, rgba(13, 148, 136, 0.16), transparent 32%),
-        radial-gradient(circle at top right, rgba(2, 132, 199, 0.12), transparent 28%),
-        linear-gradient(180deg, #f4fbfa 0%, #edf7f6 100%);
+        radial-gradient(circle at top left, var(--page-radial-start), transparent 32%),
+        radial-gradient(circle at top right, var(--page-radial-end), transparent 28%),
+        var(--page-gradient);
 }
 
 .profile-header {
@@ -58,8 +58,14 @@
     gap: 8px;
     padding: 12px 16px;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.85);
-    border: 1px solid rgba(13, 148, 136, 0.16);
+    background: var(--surface-elevated);
+    border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .profile-shell {
@@ -71,11 +77,11 @@
 
 .profile-hero,
 .profile-card {
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--glass-surface);
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.75);
+    border: 1px solid var(--glass-border);
     border-radius: 24px;
-    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+    box-shadow: var(--shadow-lg);
 }
 
 .profile-hero {
@@ -142,8 +148,8 @@
 }
 
 .hero-action--secondary {
-    background: #ffffff;
-    border: 1px solid #d8e2ea;
+    background: var(--surface-color);
+    border: 1px solid var(--border-strong);
     color: var(--text-main);
 }
 
@@ -162,15 +168,15 @@
     width: fit-content;
     padding: 6px 12px;
     border-radius: 999px;
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--warning-bg);
+    color: var(--warning-text);
     font-size: 0.82rem;
     font-weight: 700;
 }
 
 .profile-badge.verified {
-    background: #dcfce7;
-    color: #166534;
+    background: var(--success-bg);
+    color: var(--success-text);
 }
 
 .profile-card {
@@ -195,7 +201,7 @@
     height: 62px;
     border: none;
     border-radius: 999px;
-    background: #5b5f65;
+    background: var(--surface-subtle);
     color: #fff;
     display: inline-flex;
     align-items: center;
@@ -240,8 +246,8 @@
 .form-field input,
 .form-field select {
     width: 100%;
-    border: 1px solid #d6e0e7;
-    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--border-strong);
+    background: color-mix(in srgb, var(--surface-color) 94%, transparent);
     border-radius: 14px;
     padding: 14px 16px;
     font: inherit;
@@ -261,8 +267,8 @@
     gap: 10px;
     padding: 16px;
     border-radius: 18px;
-    background: linear-gradient(180deg, #f7fbfb 0%, #ffffff 100%);
-    border: 1px dashed #bfd7d3;
+    background: linear-gradient(180deg, var(--surface-muted) 0%, var(--surface-color) 100%);
+    border: 1px dashed color-mix(in srgb, var(--primary) 25%, var(--border-color));
 }
 
 .photo-meta {
@@ -297,15 +303,15 @@
 }
 
 .secondary-button {
-    background: #ffffff;
+    background: var(--surface-color);
     color: var(--text-main);
-    border: 1px solid #d6e0e7;
+    border: 1px solid var(--border-strong);
 }
 
 .secondary-button--danger {
-    color: #b91c1c;
-    border-color: #fecaca;
-    background: #fff7f7;
+    color: var(--error-text);
+    border-color: var(--error-border);
+    background: color-mix(in srgb, var(--error-bg) 72%, var(--surface-color));
 }
 
 .primary-button:hover,
@@ -323,7 +329,7 @@
 
 .field-error {
     margin: 0;
-    color: #b91c1c;
+    color: var(--error-text);
     font-size: 0.84rem;
 }
 
@@ -341,15 +347,15 @@
 }
 
 .status-message--error {
-    background: #fff1f2;
-    color: #be123c;
-    border: 1px solid #fecdd3;
+    background: var(--error-bg);
+    color: var(--error-text);
+    border: 1px solid var(--error-border);
 }
 
 .status-message--success {
-    background: #ecfdf5;
-    color: #047857;
-    border: 1px solid #a7f3d0;
+    background: var(--success-bg);
+    color: var(--success-text);
+    border: 1px solid var(--success-border);
 }
 
 .details-grid {
@@ -362,8 +368,8 @@
 .detail-item {
     padding: 18px;
     border-radius: 18px;
-    background: linear-gradient(180deg, #f8fbfb 0%, #ffffff 100%);
-    border: 1px solid #e2e8f0;
+    background: linear-gradient(180deg, var(--surface-muted) 0%, var(--surface-color) 100%);
+    border: 1px solid var(--border-subtle);
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -398,8 +404,8 @@
 
 .account-action-tile {
     text-decoration: none;
-    border: 1px solid #e2e8f0;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbfb 100%);
+    border: 1px solid var(--border-subtle);
+    background: linear-gradient(180deg, var(--surface-color) 0%, var(--surface-muted) 100%);
     border-radius: 18px;
     padding: 18px 20px;
     color: var(--text-main);
@@ -412,9 +418,9 @@
 }
 
 .account-action-tile--danger {
-    color: #b91c1c;
-    border-color: #fecaca;
-    background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%);
+    color: var(--error-text);
+    border-color: var(--error-border);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--error-bg) 72%, var(--surface-color)) 0%, var(--surface-color) 100%);
 }
 
 @media (max-width: 768px) {
@@ -427,6 +433,12 @@
     .account-actions {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .profile-identity,

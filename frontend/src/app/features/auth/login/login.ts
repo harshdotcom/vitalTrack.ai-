@@ -6,11 +6,12 @@ import { AuthService } from '../../../core/services/auth';
 import { ToastService } from '../../../core/services/toast';
 import { finalize } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { ThemeToggleComponent } from '../../../core/components/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ThemeToggleComponent],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })

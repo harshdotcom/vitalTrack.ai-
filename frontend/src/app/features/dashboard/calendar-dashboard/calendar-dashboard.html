@@ -2,9 +2,11 @@
 
     <!-- Dashboard Header -->
     <header class="dashboard-header">
-        <div class="header-title">
-            <span class="logo-icon">+</span>
-            <h1>Vitatrack.ai</h1>
+        <div class="brand-logo" style="margin-bottom: 0;">
+            <svg class="brand-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+            </svg>
+            <div class="brand-text">Vita<span class="brand-text-accent">track.ai</span></div>
         </div>
 
         <div class="header-actions">
@@ -108,23 +110,23 @@
                 </div>
             </div>
 
-            <button class="btn-secondary header-action-button" (click)="goToProfile()">
+
+            <button class="btn-primary header-action-button" (click)="openEntryOriginModal()" [title]="'Add a new health record'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New Record
+            </button>
+            <button class="btn-icon-secondary" (click)="goToProfile()" title="Account">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21a8 8 0 0 0-16 0"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                 </svg>
-                <span>Account</span>
             </button>
-            <button class="btn-primary" (click)="openUploadModal()" [disabled]="storageExceeded" [title]="storageExceeded ? 'Storage limit reached (100 MB)' : 'Upload a new report'">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                Upload Document
-            </button>
+            <app-theme-toggle [iconOnly]="true" />
             <button class="btn-icon-logout" (click)="logout()" title="Logout">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -171,14 +173,19 @@
 
                     <!-- Desktop Document List -->
                     <div class="documents-list">
-                        <div *ngFor="let doc of cell.documents | slice:0:3" class="doc-badge" [title]="doc.document_name"
-                            (click)="openDocumentDetails(doc.id); $event.stopPropagation()">
-                            <span class="doc-badge-text">{{ doc.document_name }}</span>
-                            <span *ngIf="doc.analysis_generated" title="AI analysis available"
+                        <div *ngFor="let entry of cell.documents | slice:0:3" class="doc-badge" [ngClass]="getEntryClass(entry)"
+                            [title]="getEntryTitle(entry)"
+                            (click)="handleCalendarEntryClick(entry, cell.date, cell.documents, $event)">
+                            <span class="doc-badge-copy">
+                                <span class="doc-badge-text">{{ getEntryTitle(entry) }}</span>
+                                <span class="doc-badge-meta">{{ getEntrySummary(entry) }}</span>
+                            </span>
+                            <span *ngIf="entry.analysis_generated" title="AI analysis available"
                                 style="display: inline-flex; width: 8px; height: 8px; border-radius: 999px; background: #10B981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18); flex-shrink: 0;">
                             </span>
+                            <span *ngIf="isDirectEntry(entry)" class="entry-kind-pill">Vital</span>
                             <span class="delete-icon" title="Delete"
-                                (click)="openDeleteModal(doc); $event.stopPropagation()">
+                                (click)="openDeleteModal(entry); $event.stopPropagation()">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round">
@@ -199,12 +206,139 @@
 
                     <!-- Mobile Indicator -->
                     <div class="mobile-indicator" *ngIf="cell.documents.length > 0">
-                        {{ cell.documents.length }} doc{{ cell.documents.length > 1 ? 's' : '' }}
+                        {{ getEntryCountLabel(cell.documents) }}
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- Entry Origin Modal Overlay -->
+    <div class="modal-overlay" *ngIf="isEntryOriginModalOpen">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>What would you like to add?</h3>
+                <button class="btn-close" (click)="closeEntryOriginModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="display: flex; gap: 16px; margin-top: 10px;">
+                <!-- Card 1: Vitals -->
+                <div class="entry-origin-card" (click)="selectEntryOrigin('vitals')" style="flex: 1; border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; cursor: pointer; text-align: center; transition: all 0.2s ease; background: var(--input-bg); opacity: 1;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary); margin-bottom: 16px;">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                    </svg>
+                    <h4 style="margin: 0 0 8px 0; font-size: 1.1rem; color: var(--text-main);">Direct Vitals Entry</h4>
+                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-muted); line-height: 1.4;">Log blood pressure, sugar, weight, steps, and other metrics directly.</p>
+                </div>
+
+                <!-- Card 2: Document -->
+                <div class="entry-origin-card" (click)="selectEntryOrigin('report')" style="flex: 1; border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; cursor: pointer; text-align: center; transition: all 0.2s ease; background: var(--input-bg); opacity: 1;" [style.opacity]="storageExceeded ? '0.5' : '1'" [style.pointerEvents]="storageExceeded ? 'none' : 'auto'" [title]="storageExceeded ? 'Storage limit reached' : ''">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary); margin-bottom: 16px;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <h4 style="margin: 0 0 8px 0; font-size: 1.1rem; color: var(--text-main);">Prescription / Report</h4>
+                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-muted); line-height: 1.4;">Upload a document or photo for analysis and storage.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Direct Vitals Modal Overlay -->
+    <div class="modal-overlay" *ngIf="isVitalsModalOpen">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Direct Vitals Entry</h3>
+                <button class="btn-close" (click)="closeVitalsModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <form [formGroup]="vitalsForm" (ngSubmit)="submitVitals()">
+                    <div class="form-group">
+                        <label for="vital_type">Select Metric <span class="required-star">*</span></label>
+                        <select id="vital_type" formControlName="vital_type" (change)="onVitalTypeChange()">
+                            <option value="">-- Choose a metric --</option>
+                            <option value="blood_pressure">Blood Pressure</option>
+                            <option value="blood_sugar">Blood Sugar</option>
+                            <option value="calories">Calories</option>
+                            <option value="heart_rate">Heart Rate</option>
+                            <option value="oxygen_level">Oxygen Level (%)</option>
+                            <option value="sleep_hours">Sleep Hours</option>
+                            <option value="steps">Steps</option>
+                            <option value="weight">Weight</option>
+                            <option value="notes">Notes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vital_date">Date <span class="required-star">*</span></label>
+                        <input type="date" id="vital_date" formControlName="date">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vital_time">Time <span class="required-star">*</span></label>
+                        <input type="time" id="vital_time" formControlName="time">
+                    </div>
+
+                    <!-- Dynamic Fields based on vital_type -->
+                    <div class="dynamic-vital-fields" *ngIf="vitalsForm.get('vital_type')?.value">
+                        
+                        <!-- Blood Pressure -->
+                        <div class="form-row" *ngIf="vitalsForm.get('vital_type')?.value === 'blood_pressure'">
+                            <div class="form-group">
+                                <label>Systolic (mmHg)</label>
+                                <input type="number" formControlName="bp_systolic" placeholder="120">
+                            </div>
+                            <div class="form-group">
+                                <label>Diastolic (mmHg)</label>
+                                <input type="number" formControlName="bp_diastolic" placeholder="80">
+                            </div>
+                        </div>
+
+                        <!-- Blood Sugar / Weight (Requires Unit) -->
+                        <div class="form-row" *ngIf="vitalsForm.get('vital_type')?.value === 'blood_sugar' || vitalsForm.get('vital_type')?.value === 'weight'">
+                            <div class="form-group">
+                                <label>Value</label>
+                                <input type="number" formControlName="value" placeholder="e.g. 100">
+                            </div>
+                            <div class="form-group">
+                                <label>Unit</label>
+                                <input *ngIf="vitalsForm.get('vital_type')?.value === 'blood_sugar'" type="text" formControlName="unit" placeholder="mg/dL">
+                                <select *ngIf="vitalsForm.get('vital_type')?.value === 'weight'" formControlName="unit">
+                                    <option value="kg">kg</option>
+                                    <option value="lbs">lbs</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Single Number Values -->
+                        <div class="form-group" *ngIf="['calories', 'heart_rate', 'oxygen_level', 'sleep_hours', 'steps'].includes(vitalsForm.get('vital_type')?.value)">
+                            <label>Value</label>
+                            <input type="number" formControlName="value" placeholder="Enter value">
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="form-group" *ngIf="vitalsForm.get('vital_type')?.value === 'notes'">
+                            <label>Note text</label>
+                            <textarea formControlName="notes" rows="4" placeholder="Enter your detailed note here..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-family: inherit; font-size: 0.95rem; resize: vertical; box-sizing: border-box;"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="api-error" *ngIf="vitalsError">
+                        {{ vitalsError }}
+                    </div>
+
+                    <div class="modal-actions" style="margin-top: 24px;">
+                        <button type="button" class="btn-secondary" (click)="closeVitalsModal()" [disabled]="isSavingVitals">Cancel</button>
+                        <button type="submit" class="btn-primary" [disabled]="isSavingVitals || vitalsForm.invalid">
+                            <span *ngIf="!isSavingVitals">Save Entry</span>
+                            <span *ngIf="isSavingVitals" class="loader"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Upload Modal Overlay -->
     <div class="modal-overlay" *ngIf="isUploadModalOpen">
@@ -271,23 +405,28 @@
 
     <!-- Day Documents Modal -->
     <div class="modal-overlay" *ngIf="isDayModalOpen">
-        <div class="modal-card">
+        <div class="modal-card day-modal-card">
             <div class="modal-header">
-                <h3>Documents for {{ selectedDayDate | date:'longDate' }}</h3>
+                <h3>Entries for {{ selectedDayDate | date:'longDate' }}</h3>
                 <button class="btn-close" (click)="closeDayModal()">&times;</button>
             </div>
-            <div class="modal-body" style="display: flex; flex-direction: column; gap: 8px;">
-                <div *ngFor="let doc of selectedDayDocuments" class="doc-badge"
-                    style="cursor: pointer; padding: 12px; display: flex; align-items: center; justify-content: space-between; font-size: 1rem;"
-                    (click)="openDocumentDetails(doc.id); closeDayModal()">
-                    <span style="display: inline-flex; align-items: center; gap: 8px;">
-                        <span>{{ doc.document_name }}</span>
-                        <span *ngIf="doc.analysis_generated"
+            <div class="modal-body day-modal-body">
+                <div *ngFor="let entry of selectedDayDocuments" class="day-entry-card" [ngClass]="getEntryClass(entry)"
+                    [class.day-entry-card--clickable]="isDocumentEntry(entry)"
+                    (click)="handleDayModalEntryClick(entry)">
+                    <span class="day-entry-main">
+                        <span class="day-entry-title-row">
+                            <span>{{ getEntryTitle(entry) }}</span>
+                            <span *ngIf="isDirectEntry(entry)" class="entry-kind-pill entry-kind-pill--light">Direct Entry</span>
+                        </span>
+                        <span class="day-entry-subtitle">{{ getEntrySummary(entry) }}</span>
+                        <span class="day-entry-time">{{ getEntryTime(entry) }}</span>
+                        <span *ngIf="entry.analysis_generated"
                             style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; background: #ECFDF5; color: #047857; font-size: 0.75rem; font-weight: 600;">
                             AI Ready
                         </span>
                     </span>
-                    <span class="delete-icon" title="Delete" (click)="openDeleteModal(doc); $event.stopPropagation()">
+                    <span class="delete-icon" title="Delete" (click)="openDeleteModal(entry); $event.stopPropagation()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
@@ -345,8 +484,55 @@
 
                     <!-- Right: Metadata -->
                     <div class="info-section">
-                        <h4 style="margin-top: 0; margin-bottom: 24px; color: var(--text-main); font-size: 1.25rem;">{{
-                            selectedDocDetails.document_name }}</h4>
+                                                <div *ngIf="isEditingDetails" [formGroup]="editForm" style="display: flex; flex-direction: column; gap: 16px;">
+                            <h4 style="margin-top: 0; color: var(--text-main); font-size: 1.25rem;">Edit Document</h4>
+                            
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.875rem; font-weight: 500; color: var(--text-muted); margin-bottom: 4px; display: block;">Document Name</label>
+                                <input type="text" formControlName="document_name" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color, #E5E7EB); background: var(--input-bg); color: var(--text-main);" />
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.875rem; font-weight: 500; color: var(--text-muted); margin-bottom: 4px; display: block;">Category</label>
+                                <select formControlName="category" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color, #E5E7EB); background: var(--input-bg); color: var(--text-main);">
+                                    <option value="Medical Report">Medical Report</option>
+                                    <option value="Prescription">Prescription</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.875rem; font-weight: 500; color: var(--text-muted); margin-bottom: 4px; display: block;">Date</label>
+                                <input type="date" formControlName="document_date" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color, #E5E7EB); background: var(--input-bg); color: var(--text-main);" />
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.875rem; font-weight: 500; color: var(--text-muted); margin-bottom: 4px; display: block;">Tags (comma separated)</label>
+                                <input type="text" formControlName="tags" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color, #E5E7EB); background: var(--input-bg); color: var(--text-main);" placeholder="e.g. cbc, fasting" />
+                            </div>
+
+                            <div *ngIf="updateDocError" class="api-error" style="margin-top: 8px;">{{ updateDocError }}</div>
+
+                            <div style="display: flex; gap: 12px; margin-top: 16px;">
+                                <button type="button" class="btn-secondary" (click)="cancelEditDoc()" [disabled]="isUpdatingDocument" style="flex: 1;">Cancel</button>
+                                <button type="button" class="btn-primary" (click)="saveEditDoc()" [disabled]="isUpdatingDocument" style="flex: 1;">
+                                    <span *ngIf="!isUpdatingDocument">Save Changes</span>
+                                    <span *ngIf="isUpdatingDocument" class="loader"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <ng-container *ngIf="!isEditingDetails">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+                                <h4 style="margin-top: 0; margin-bottom: 0; color: var(--text-main); font-size: 1.25rem; flex: 1;">{{
+                                    selectedDocDetails.document_name }}</h4>
+                                <button class="btn-icon" (click)="toggleEditDoc()" title="Edit Document" style="margin-left: 12px; padding: 6px; border-radius: 6px; background: rgba(139, 92, 246, 0.1); border: none; color: #8B5CF6; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                            </div>
 
                         <div class="info-row">
                             <span class="info-label">Category:</span>
@@ -447,6 +633,7 @@
                                 Download Report
                             </a>
                         </div>
+                        </ng-container>
                     </div>
                 </div>
             </div>
@@ -467,7 +654,7 @@
                 <button class="btn-close" (click)="closeDeleteModal()">&times;</button>
             </div>
             <div class="modal-body" style="padding-top: 10px;">
-                <p>Are you sure you want to delete <strong>{{ documentToDelete?.document_name || 'this document'
+                <p>Are you sure you want to delete <strong>{{ documentToDelete?.document_name || 'this entry'
                         }}</strong>? This action cannot be undone.</p>
                 <div class="api-error" *ngIf="deleteError" style="margin-top: 16px;">
                     {{ deleteError }}
@@ -477,7 +664,7 @@
                         [disabled]="isDeleting">Cancel</button>
                     <button type="button" class="btn-primary btn-danger" (click)="confirmDelete()"
                         [disabled]="isDeleting">
-                        <span *ngIf="!isDeleting">Delete Document</span>
+                        <span *ngIf="!isDeleting">Delete Entry</span>
                         <span *ngIf="isDeleting" class="loader"></span>
                     </button>
                 </div>

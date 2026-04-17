@@ -6,6 +6,12 @@ import (
 )
 
 func SaveHealtMetric(req models.SaveHealthMetricRequest, userId int64) (*models.DailyHealthMetric, error) {
+	if req.Timestamp != nil && *req.Timestamp != "" {
+		if _, err := req.ResolveTimestamp(); err != nil {
+			return nil, err
+		}
+	}
+
 	metric := req.ToModel()
 	metric.UploadedBy = userId
 
@@ -17,4 +23,8 @@ func SaveHealtMetric(req models.SaveHealthMetricRequest, userId int64) (*models.
 	err = repository.SaveHealthMetric(metric)
 
 	return metric, err
+}
+
+func DeleteHealthMetric(id string, userID int64) error {
+	return repository.DeleteHealthMetric(id, userID)
 }

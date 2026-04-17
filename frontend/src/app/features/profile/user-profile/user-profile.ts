@@ -4,11 +4,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService, AuthUser, UpdateProfilePayload } from '../../../core/services/auth';
+import { ThemeToggleComponent } from '../../../core/components/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ThemeToggleComponent],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.css',
 })

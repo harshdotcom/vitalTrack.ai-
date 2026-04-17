@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -9,9 +10,9 @@ type DailyHealthMetric struct {
 	ID            string `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	UploadedBy    int64
 	HeartRate     *int           // bpm
-	Weight        *Measurement   `gorm:"type:jsonb"` // supports units
-	BloodPressure *BloodPressure `gorm:"type:jsonb"`
-	BloodSugar    *Measurement   `gorm:"type:jsonb"`
+	Weight        *Measurement   `gorm:"serializer:json;type:jsonb"` // supports units
+	BloodPressure *BloodPressure `gorm:"serializer:json;type:jsonb"`
+	BloodSugar    *Measurement   `gorm:"serializer:json;type:jsonb"`
 	Notes         *string
 	SleepHours    *float64
 	Steps         *int
@@ -27,8 +28,8 @@ type Measurement struct {
 }
 
 type BloodPressure struct {
-	Systolic  int // mmHg
-	Diastolic int // mmHg
+	Systolic  int `json:"systolic"`  // mmHg
+	Diastolic int `json:"diastolic"` // mmHg
 }
 
 func (d *DailyHealthMetric) Validate() error {
@@ -73,7 +74,8 @@ type SaveHealthMetricRequest struct {
 	Calories    *int     `json:"calories" example:"2200"`   // kcal burned/consumed
 	OxygenLevel *float64 `json:"oxygen_level" example:"98"` // SpO2 (%)
 
-	Notes *string `json:"notes"`
+	Notes     *string `json:"notes"`
+	Timestamp *string `json:"timestamp" example:"2026-04-16T22:05:00+05:30"`
 }
 
 func (r *SaveHealthMetricRequest) ToModel() *DailyHealthMetric {
@@ -87,6 +89,9 @@ func (r *SaveHealthMetricRequest) ToModel() *DailyHealthMetric {
 	}
 
 	timestamp := time.Now()
+	if parsedTimestamp, err := r.ResolveTimestamp(); err == nil {
+		timestamp = parsedTimestamp
+	}
 
 	return &DailyHealthMetric{
 		Timestamp:     timestamp,
@@ -100,4 +105,111 @@ func (r *SaveHealthMetricRequest) ToModel() *DailyHealthMetric {
 		OxygenLevel:   r.OxygenLevel,
 		Notes:         r.Notes,
 	}
+}
+
+func (d *DailyHealthMetric) MetricType() string {
+	switch {
+	case d.BloodPressure != nil:
+		return "blood_pressure"
+	case d.BloodSugar != nil:
+		return "blood_sugar"
+	case d.Weight != nil:
+		return "weight"
+	case d.HeartRate != nil:
+		return "heart_rate"
+	case d.OxygenLevel != nil:
+		return "oxygen_level"
+	case d.SleepHours != nil:
+		return "sleep_hours"
+	case d.Steps != nil:
+		return "steps"
+	case d.Calories != nil:
+		return "calories"
+	case d.Notes != nil && *d.Notes != "":
+		return "notes"
+	default:
+		return "unknown"
+	}
+}
+
+func (d *DailyHealthMetric) MetricLabel() string {
+	switch d.MetricType() {
+	case "blood_pressure":
+		return "Blood Pressure"
+	case "blood_sugar":
+		return "Blood Sugar"
+	case "weight":
+		return "Weight"
+	case "heart_rate":
+		return "Heart Rate"
+	case "oxygen_level":
+		return "Oxygen Level"
+	case "sleep_hours":
+		return "Sleep Hours"
+	case "steps":
+		return "Steps"
+	case "calories":
+		return "Calories"
+	case "notes":
+		return "Notes"
+	default:
+		return "Direct Entry"
+	}
+}
+
+func (d *DailyHealthMetric) MetricSummary() string {
+	switch d.MetricType() {
+	case "blood_pressure":
+		return fmt.Sprintf("%d/%d mmHg", d.BloodPressure.Systolic, d.BloodPressure.Diastolic)
+	case "blood_sugar":
+		return fmt.Sprintf("%g %s", d.BloodSugar.Value, d.BloodSugar.Unit)
+	case "weight":
+		return fmt.Sprintf("%g %s", d.Weight.Value, d.Weight.Unit)
+	case "heart_rate":
+		return fmt.Sprintf("%d bpm", *d.HeartRate)
+	case "oxygen_level":
+		return fmt.Sprintf("%g%%", *d.OxygenLevel)
+	case "sleep_hours":
+		return fmt.Sprintf("%g hrs", *d.SleepHours)
+	case "steps":
+		return fmt.Sprintf("%d steps", *d.Steps)
+	case "calories":
+		return fmt.Sprintf("%d kcal", *d.Calories)
+	case "notes":
+		return *d.Notes
+	default:
+		return "Logged directly in VitaTrack"
+	}
+}
+
+func parseMetricTimestamp(raw *string) (time.Time, error) {
+	if raw == nil || *raw == "" {
+		return time.Time{}, errors.New("timestamp not provided")
+	}
+
+	layouts := []string{
+		time.RFC3339Nano,
+		time.RFC3339,
+		"2006-01-02T15:04",
+		"2006-01-02",
+	}
+
+	for _, layout := range layouts {
+		if layout == "2006-01-02T15:04" || layout == "2006-01-02" {
+			if ts, err := time.ParseInLocation(layout, *raw, time.Local); err == nil {
+				return ts, nil
+			}
+			continue
+		}
+
+		if ts, err := time.Parse(layout, *raw); err == nil {
+			return ts, nil
+		}
+	}
+
+	return time.Time{}, fmt.Errorf("invalid timestamp format")
+}
+
+func (r *SaveHealthMetricRequest) ResolveTimestamp() (time.Time, error) {
+	return parseMetricTimestamp(r.Timestamp)
 }

@@ -1,9 +1,14 @@
 <div class="auth-container">
+    <div class="theme-toggle-floating">
+        <app-theme-toggle [iconOnly]="true" />
+    </div>
     <div class="auth-card">
         <div class="auth-header">
-            <div class="logo">
-                <span class="logo-icon">+</span>
-                <h1>Vitatrack.ai</h1>
+            <div class="brand-logo">
+                <svg class="brand-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+                <div class="brand-text">Vita<span class="brand-text-accent">track.ai</span></div>
             </div>
             <h2>Create an Account</h2>
             <p>Start your secure medical journaling journey</p>
@@ -13,7 +18,7 @@
 
             <div class="form-group">
                 <label for="name">Full Name</label>
-                <input id="name" type="text" formControlName="name" placeholder="Dr. John Doe"
+                <input id="name" type="text" formControlName="name" placeholder="Full Name"
                     [class.invalid]="signupForm.get('name')?.invalid && signupForm.get('name')?.touched">
                 <div class="error-message" *ngIf="signupForm.get('name')?.invalid && signupForm.get('name')?.touched">
                     <span *ngIf="signupForm.get('name')?.hasError('required')">Name is required.</span>

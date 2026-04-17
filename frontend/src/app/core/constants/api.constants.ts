@@ -19,6 +19,9 @@ export const API_CONSTANTS = {
   get DOCUMENTS_URL() {
     return `${this.BASE_URL}/documents`;
   },
+  get UPDATE_DOCUMENT_URL() {
+    return `${this.BASE_URL}/documents/update`;
+  },
   get FILE_URL() {
     return `${this.BASE_URL}/files`;
   },
@@ -42,5 +45,11 @@ export const API_CONSTANTS = {
   },
   get UPDATE_PROFILE_URL() {
     return `${this.BASE_URL}/user-details/update`;
+  },
+  get HEALTH_METRIC_SAVE_URL() {
+    return `${this.BASE_URL}/health-metric/save`;
+  },
+  get HEALTH_METRIC_URL() {
+    return `${this.BASE_URL}/health-metric`;
   }
 };

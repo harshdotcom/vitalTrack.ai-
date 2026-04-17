@@ -4,11 +4,12 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentService } from '../../../core/services/document';
 import { ToastService } from '../../../core/services/toast';
+import { ThemeToggleComponent } from '../../../core/components/theme-toggle/theme-toggle';
 
 @Component({
   selector: 'app-details-view',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ThemeToggleComponent],
   templateUrl: './details-view.html',
   styleUrl: './details-view.css',
 })

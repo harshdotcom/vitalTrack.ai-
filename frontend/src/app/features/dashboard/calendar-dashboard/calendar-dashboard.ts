@@ -6,17 +6,33 @@ import { Router } from '@angular/router';
 import { DocumentService } from '../../../core/services/document';
 import { ToastService } from '../../../core/services/toast';
 import { AuthService } from '../../../core/services/auth';
+import { ThemeToggleComponent } from '../../../core/components/theme-toggle/theme-toggle';
+
+interface CalendarEntry {
+  id: string;
+  entry_type: 'document' | 'direct_entry';
+  category: string;
+  document_name: string;
+  status: string;
+  document_date: string;
+  analysis_generated: boolean;
+  metric_type?: string;
+  metric_label?: string;
+  metric_summary?: string;
+  timestamp?: string;
+  tags?: string | string[];
+}
 
 interface CalendarDay {
   date: Date;
   isCurrentMonth: boolean;
-  documents: any[];
+  documents: CalendarEntry[];
 }
 
 @Component({
   selector: 'app-calendar-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ThemeToggleComponent],
   templateUrl: './calendar-dashboard.html',
   styleUrl: './calendar-dashboard.css',
 })
@@ -34,14 +50,14 @@ export class CalendarDashboard implements OnInit {
   weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   
   // API Data mapping: date string (YYYY-MM-DD) -> array of documents
-  reportsMap: { [key: string]: any[] } = {};
+  reportsMap: { [key: string]: CalendarEntry[] } = {};
 
   isLoading = true;
 
   // Day Modal State (For "+X more" clicks)
   isDayModalOpen = false;
   selectedDayDate: Date | null = null;
-  selectedDayDocuments: any[] = [];
+  selectedDayDocuments: CalendarEntry[] = [];
 
   // Details Modal State
   isDetailsModalOpen = false;
@@ -49,6 +65,36 @@ export class CalendarDashboard implements OnInit {
   selectedDocDetails: any = null;
   rawFileUrl = '';
   selectedFileUrl: SafeResourceUrl | null = null;
+
+  isEditingDetails = false;
+  isUpdatingDocument = false;
+  updateDocError = '';
+
+  editForm: FormGroup = this.fb.group({
+    document_name: ['', Validators.required],
+    category: ['Medical Report', Validators.required],
+    document_date: ['', Validators.required],
+    tags: ['']
+  });
+
+  // Entry Origin Modal State
+  isEntryOriginModalOpen = false;
+
+  // Vitals Modal State
+  isVitalsModalOpen = false;
+  isSavingVitals = false;
+  vitalsError = '';
+  
+  vitalsForm: FormGroup = this.fb.group({
+    vital_type: ['', Validators.required],
+    date: ['', Validators.required],
+    time: ['', Validators.required],
+    bp_systolic: [null],
+    bp_diastolic: [null],
+    unit: ['mg/dL'],
+    value: [null],
+    notes: ['']
+  });
 
   // Upload Modal State
   isUploadModalOpen = false;
@@ -171,9 +217,9 @@ export class CalendarDashboard implements OnInit {
             Object.keys(daysData).forEach(dateStr => {
               const dayItem = daysData[dateStr];
               if (dayItem && Array.isArray(dayItem.documents)) {
-                this.reportsMap[dateStr] = dayItem.documents;
+                this.reportsMap[dateStr] = dayItem.documents.map((entry: any) => this.normalizeCalendarEntry(entry));
               } else if (Array.isArray(dayItem)) {
-                this.reportsMap[dateStr] = dayItem;
+                this.reportsMap[dateStr] = dayItem.map((entry: any) => this.normalizeCalendarEntry(entry));
               } else {
                 this.reportsMap[dateStr] = [];
               }
@@ -246,6 +292,28 @@ export class CalendarDashboard implements OnInit {
     return `${y}-${m}-${d}`;
   }
 
+  formatTimeForInput(date: Date): string {
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mm = String(date.getMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
+
+  buildLocalTimestamp(date: string, time: string): string {
+    if (!date) {
+      return new Date().toISOString();
+    }
+
+    const timeValue = time || '00:00';
+    const localDate = new Date(`${date}T${timeValue}:00`);
+    const offsetMinutes = -localDate.getTimezoneOffset();
+    const sign = offsetMinutes >= 0 ? '+' : '-';
+    const absOffset = Math.abs(offsetMinutes);
+    const offsetHours = String(Math.floor(absOffset / 60)).padStart(2, '0');
+    const offsetMins = String(absOffset % 60).padStart(2, '0');
+
+    return `${date}T${timeValue}:00${sign}${offsetHours}:${offsetMins}`;
+  }
+
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
@@ -281,6 +349,98 @@ export class CalendarDashboard implements OnInit {
         }
       },
       error: (err) => console.error('Failed to fetch AI credits', err)
+    });
+  }
+
+  openEntryOriginModal() {
+    this.isEntryOriginModalOpen = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeEntryOriginModal() {
+    this.isEntryOriginModalOpen = false;
+    document.body.style.overflow = '';
+  }
+
+  selectEntryOrigin(type: 'vitals' | 'report') {
+    this.closeEntryOriginModal();
+    if (type === 'report') {
+      this.openUploadModal();
+    } else {
+      this.openVitalsModal();
+    }
+  }
+
+  // --- Vitals Modal Methods ---
+  openVitalsModal() {
+    this.isVitalsModalOpen = true;
+    document.body.style.overflow = 'hidden';
+    this.vitalsError = '';
+    this.vitalsForm.reset({
+      date: this.formatDateForApi(new Date()),
+      time: this.formatTimeForInput(new Date()),
+      unit: 'mg/dL'
+    });
+  }
+
+  closeVitalsModal() {
+    this.isVitalsModalOpen = false;
+    document.body.style.overflow = '';
+  }
+
+  onVitalTypeChange() {
+    const type = this.vitalsForm.get('vital_type')?.value;
+    if (type === 'blood_sugar') {
+      this.vitalsForm.patchValue({ unit: 'mg/dL' });
+    } else if (type === 'weight') {
+      this.vitalsForm.patchValue({ unit: 'kg' });
+    }
+  }
+
+  submitVitals() {
+    if (this.vitalsForm.invalid) {
+      this.vitalsForm.markAllAsTouched();
+      return;
+    }
+    
+    const formVals = this.vitalsForm.value;
+    const type = formVals.vital_type;
+    
+    let payload: any = {};
+    
+    if (type === 'blood_pressure') {
+      payload['blood_pressure'] = {
+        systolic: Number(formVals.bp_systolic),
+        diastolic: Number(formVals.bp_diastolic)
+      };
+    } else if (type === 'blood_sugar') {
+      payload['blood_sugar'] = { unit: formVals.unit, value: Number(formVals.value) };
+    } else if (['calories', 'heart_rate', 'oxygen_level', 'sleep_hours', 'steps'].includes(type)) {
+      payload[type] = Number(formVals.value);
+    } else if (type === 'weight') {
+      payload['weight'] = { unit: formVals.unit, value: Number(formVals.value) };
+    } else if (type === 'notes') {
+      payload['notes'] = formVals.notes;
+    }
+
+    payload['timestamp'] = this.buildLocalTimestamp(formVals.date, formVals.time);
+
+    this.isSavingVitals = true;
+    this.vitalsError = '';
+    
+    this.documentService.saveHealthMetric(payload).subscribe({
+      next: () => {
+        this.isSavingVitals = false;
+        this.closeVitalsModal();
+        this.toastService.showSuccess('Vital entry saved successfully');
+        this.fetchMonthData();
+      },
+      error: (err) => {
+        this.isSavingVitals = false;
+        const msg = err.error?.message || 'Failed to save vitals.';
+        this.vitalsError = msg;
+        this.toastService.showError(msg);
+      }
     });
   }
 
@@ -378,7 +538,7 @@ export class CalendarDashboard implements OnInit {
   }
 
   // --- Day Modal Methods ---
-  openDayModal(date: Date, documents: any[]) {
+  openDayModal(date: Date, documents: CalendarEntry[]) {
     this.selectedDayDate = date;
     this.selectedDayDocuments = documents;
     this.isDayModalOpen = true;
@@ -390,6 +550,76 @@ export class CalendarDashboard implements OnInit {
     document.body.style.overflow = '';
     this.selectedDayDate = null;
     this.selectedDayDocuments = [];
+  }
+
+  isDocumentEntry(entry: CalendarEntry): boolean {
+    return entry.entry_type !== 'direct_entry';
+  }
+
+  isDirectEntry(entry: CalendarEntry): boolean {
+    return entry.entry_type === 'direct_entry';
+  }
+
+  getEntryTitle(entry: CalendarEntry): string {
+    if (this.isDirectEntry(entry)) {
+      return entry.metric_label || entry.document_name || 'Direct Entry';
+    }
+
+    return entry.document_name || 'Document';
+  }
+
+  getEntrySummary(entry: CalendarEntry): string {
+    if (this.isDirectEntry(entry)) {
+      return entry.metric_summary || 'Logged directly in VitaTrack';
+    }
+
+    return entry.category || 'Document';
+  }
+
+  getEntryTime(entry: CalendarEntry): string {
+    const raw = entry.timestamp || entry.document_date;
+    if (!raw) {
+      return '';
+    }
+
+    return new Date(raw).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  getEntryClass(entry: CalendarEntry): string {
+    return this.isDirectEntry(entry) ? 'doc-badge--direct-entry' : 'doc-badge--document';
+  }
+
+  getEntryCountLabel(entries: CalendarEntry[]): string {
+    const directCount = entries.filter(entry => this.isDirectEntry(entry)).length;
+    const documentCount = entries.length - directCount;
+
+    if (directCount > 0 && documentCount > 0) {
+      return `${entries.length} entries`;
+    }
+
+    if (directCount > 0) {
+      return `${directCount} vital${directCount > 1 ? 's' : ''}`;
+    }
+
+    return `${documentCount} doc${documentCount > 1 ? 's' : ''}`;
+  }
+
+  handleCalendarEntryClick(entry: CalendarEntry, date: Date, dayEntries: CalendarEntry[], event?: Event) {
+    event?.stopPropagation();
+
+    if (this.isDocumentEntry(entry)) {
+      this.openDocumentDetails(entry.id);
+      return;
+    }
+
+    this.openDayModal(date, dayEntries);
+  }
+
+  handleDayModalEntryClick(entry: CalendarEntry) {
+    if (this.isDocumentEntry(entry)) {
+      this.openDocumentDetails(entry.id);
+      this.closeDayModal();
+    }
   }
 
   // --- Delete Modal Methods ---
@@ -422,8 +652,11 @@ export class CalendarDashboard implements OnInit {
     
     this.isDeleting = true;
     this.deleteError = '';
+    const deleteRequest = this.isDirectEntry(this.documentToDelete)
+      ? this.documentService.deleteHealthMetric(this.documentToDelete.id)
+      : this.documentService.deleteDocument(this.documentToDelete.id);
 
-    this.documentService.deleteDocument(this.documentToDelete.id).subscribe({
+    deleteRequest.subscribe({
       next: () => {
         this.isDeleting = false;
         this.closeDeleteModal();
@@ -439,8 +672,8 @@ export class CalendarDashboard implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Failed to delete document', err);
-        const errMsg = err.error?.message || 'Failed to delete the document. Please try again.';
+        console.error('Failed to delete entry', err);
+        const errMsg = err.error?.message || 'Failed to delete the entry. Please try again.';
         this.deleteError = errMsg;
         this.toastService.showError(errMsg);
         this.isDeleting = false;
@@ -601,6 +834,50 @@ export class CalendarDashboard implements OnInit {
     );
   }
 
+  toggleEditDoc() {
+    if (!this.selectedDocDetails) return;
+    this.isEditingDetails = true;
+    this.updateDocError = '';
+    this.editForm.patchValue({
+      document_name: this.selectedDocDetails.document_name,
+      category: this.selectedDocDetails.category || 'Medical Report',
+      document_date: this.selectedDocDetails.document_date ? this.selectedDocDetails.document_date.split('T')[0] : '',
+      tags: this.selectedDocDetails.parsedTags ? this.selectedDocDetails.parsedTags.join(', ') : ''
+    });
+  }
+
+  cancelEditDoc() {
+    this.isEditingDetails = false;
+  }
+
+  saveEditDoc() {
+    if (this.editForm.invalid || !this.selectedDocDetails) return;
+    this.isUpdatingDocument = true;
+    this.updateDocError = '';
+
+    const formValues = this.editForm.value;
+    const payload = {
+      document_name: formValues.document_name,
+      category: formValues.category,
+      document_date: formValues.document_date,
+      Tags: formValues.tags || ''
+    };
+
+    this.documentService.updateDocument(this.selectedDocDetails.id, payload).subscribe({
+      next: () => {
+        this.isUpdatingDocument = false;
+        this.isEditingDetails = false;
+        this.toastService.showSuccess('Document updated successfully');
+        this.openDocumentDetails(this.selectedDocDetails.id);
+        this.fetchMonthData();
+      },
+      error: (err: any) => {
+        this.isUpdatingDocument = false;
+        this.updateDocError = err?.error?.message || 'Failed to update document.';
+        this.toastService.showError(this.updateDocError);
+      }
+    });
+  }
   toggleCreditsSupportPopup() {
     this.showCreditsSupportPopup = !this.showCreditsSupportPopup;
   }
@@ -669,5 +946,23 @@ export class CalendarDashboard implements OnInit {
     } catch (e) {
       return [];
     }
+  }
+
+  normalizeCalendarEntry(entry: any): CalendarEntry {
+    const entryType = entry?.entry_type === 'direct_entry' ? 'direct_entry' : 'document';
+    return {
+      id: entry?.id || '',
+      entry_type: entryType,
+      category: entry?.category || (entryType === 'direct_entry' ? 'Direct Entry' : 'Document'),
+      document_name: entry?.document_name || entry?.metric_label || 'Untitled',
+      status: entry?.status || (entryType === 'direct_entry' ? 'logged' : 'uploaded'),
+      document_date: entry?.document_date || entry?.timestamp || '',
+      analysis_generated: !!entry?.analysis_generated,
+      metric_type: entry?.metric_type,
+      metric_label: entry?.metric_label,
+      metric_summary: entry?.metric_summary,
+      timestamp: entry?.timestamp,
+      tags: entry?.tags
+    };
   }
 }

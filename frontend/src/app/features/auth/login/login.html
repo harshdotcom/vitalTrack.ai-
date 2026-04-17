@@ -1,9 +1,14 @@
 <div class="auth-container">
+    <div class="theme-toggle-floating">
+        <app-theme-toggle [iconOnly]="true" />
+    </div>
     <div class="auth-card">
         <div class="auth-header">
-            <div class="logo">
-                <span class="logo-icon">+</span>
-                <h1>Vitatrack.ai</h1>
+            <div class="brand-logo">
+                <svg class="brand-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+                <div class="brand-text">Vita<span class="brand-text-accent">track.ai</span></div>
             </div>
             <h2>{{ (emailVerificationEnabled && isForgotPasswordOpen) ? 'Reset Password' : 'Welcome Back' }}</h2>
             <p>{{ (emailVerificationEnabled && isForgotPasswordOpen) ? 'Use your email, OTP, and new password to restore access.' : 'Log in to access your medical journal' }}</p>
