@@ -1,11 +1,66 @@
 basePath: /api/v1
 definitions:
+  models.Document:
+    properties:
+      analysis_generated:
+        type: boolean
+      category:
+        type: string
+      document_date:
+        type: string
+      document_name:
+        type: string
+      file:
+        $ref: '#/definitions/models.File'
+      id:
+        type: string
+      status:
+        type: string
+      tags:
+        description: JSON string
+        type: string
+      user_id:
+        description: ID         string    `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+        type: integer
+    type: object
+  models.File:
+    properties:
+      createdAt:
+        type: string
+      fileSize:
+        format: int64
+        type: integer
+      id:
+        type: string
+      mimeType:
+        type: string
+      originalName:
+        type: string
+      s3Key:
+        type: string
+      storedName:
+        type: string
+      uploadedBy:
+        format: int64
+        type: integer
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
   models.ForgetPasswordRequest:
     properties:
       email:
         type: string
     required:
     - email
+    type: object
+  models.InfiniteScrollResponse:
+    properties:
+      cursor:
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/models.Document'
+        type: array
     type: object
   models.LoginRequest:
     properties:
@@ -73,8 +128,40 @@ definitions:
         description: daily steps
         example: 8500
         type: integer
+      timestamp:
+        example: "2026-04-16T22:05:00+05:30"
+        type: string
       weight:
         $ref: '#/definitions/models.Measurement'
+    type: object
+  models.User:
+    properties:
+      age:
+        type: integer
+      created_at:
+        description: YYYY-MM-DD HH:MM:SS.microseconds stored in DB
+        type: string
+      dob:
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      google_id:
+        type: string
+      is_verified:
+        type: boolean
+      name:
+        type: string
+      profile_pic:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - email
+    - name
     type: object
 host: localhost:8081
 info:
@@ -104,6 +191,39 @@ paths:
     post:
       responses: {}
       summary: Get Calendar Documents
+      tags:
+      - Document
+  /documents/infiniteScroll:
+    get:
+      parameters:
+      - description: Base64 encoded cursor from previous response
+        in: query
+        name: cursor
+        type: string
+      - description: 'Number of documents to fetch (default: 12)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.InfiniteScrollResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get Infinite Scroll Documents
       tags:
       - Document
   /documents/update/{id}:
@@ -353,6 +473,43 @@ paths:
             additionalProperties: true
             type: object
       summary: User Login
+      tags:
+      - User
+  /users/resend-otp:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Email payload
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Resend OTP
       tags:
       - User
   /users/reset-password:

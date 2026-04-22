@@ -63,7 +63,7 @@ Request Payload:
   "report_type": "blood_test",
   "file_type": "lab_report",
   "tags": ["cbc","vitamin_d"],
-  "report_date": "2026-03-15"
+  "document_date": "2026-03-15"
 }
 
 Field Description:
@@ -73,10 +73,10 @@ category    (string)  required  -> Document category
 report_type (string)  required  -> Type of report
 file_type   (string)  required  -> File classification
 tags        (array)   optional  -> Tags for filtering/search
-report_date (string)  required  -> Format: YYYY-MM-DD
+document_date (string)  required  -> Format: YYYY-MM-DD
 
 Important:
-report_date must match format:
+document_date must match format:
 2006-01-02 (Go time layout)
 
 Successful Response (200):
@@ -95,7 +95,7 @@ Validation Errors (400):
 or
 
 {
-  "error": "invalid report_date format (use YYYY-MM-DD)"
+  "error": "invalid document_date format (use YYYY-MM-DD)"
 }
 
 Server Error (500):
@@ -129,7 +129,7 @@ Success Response (200):
   "file_type": "lab_report",
   "tags": "[\"cbc\",\"vitamin_d\"]",
   "status": "uploaded",
-  "report_date": "2026-03-15T00:00:00Z"
+  "document_date": "2026-03-15T00:00:00Z"
 }
 
 Not Found (404):
@@ -200,8 +200,8 @@ end   := start.AddDate(0,1,0)
 Query:
 
 WHERE user_id = ?
-AND report_date >= start
-AND report_date < end
+AND document_date >= start
+AND document_date < end
 
 Success Response (200):
 
@@ -216,7 +216,7 @@ Success Response (200):
           "id": "uuid",
           "category": "medical",
           "report_type": "blood_test",
-          "report_date": "2026-03-15T00:00:00Z"
+          "document_date": "2026-03-15T00:00:00Z"
         }
       ]
     }
@@ -251,14 +251,14 @@ COMMON ISSUES / DEBUG NOTES
 1) Empty calendar response:
 
 Cause:
-report_date missing or invalid during upload.
+document_date missing or invalid during upload.
 
 Result:
-report_date saved as:
+document_date saved as:
 0001-01-01 (Go zero time)
 
 Fix:
-Always send report_date in payload.
+Always send document_date in payload.
 
 --------------------------------------------------------------------
 
@@ -306,7 +306,7 @@ Upload file (File API)
 Step 2:
 Create document
 POST /documents
--> save metadata + report_date
+-> save metadata + document_date
 
 Step 3:
 Fetch calendar
@@ -326,7 +326,7 @@ DELETE /documents/:id
 BEST PRACTICES (RECOMMENDED)
 --------------------------------------------------------------------
 
-1) Make report_date required.
+1) Make document_date required.
 2) Never ignore time.Parse errors.
 3) Use type:date in DB if only date is needed.
 4) Always validate file_id exists before document creation.

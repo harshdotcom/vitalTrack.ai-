@@ -8,6 +8,7 @@ import (
 
 	"vita-track-ai/models"
 	"vita-track-ai/repository"
+	"vita-track-ai/utility"
 
 	"github.com/gin-gonic/gin"
 )
@@ -223,4 +224,35 @@ func getEntryTime(value interface{}) time.Time {
 	}
 
 	return time.Time{}
+}
+
+func GetInfiniteScroll(cursorStr string, userId int64, limit int64) ([]models.Document, string, error) {
+	cursor, err := utility.DecodeCursor(cursorStr)
+
+	if err != nil {
+		return nil, "", err
+	}
+
+	if limit <= 0 {
+		limit = 12
+	}
+	if limit > 50 {
+		limit = 50
+	}
+
+	documents, nextCursor, err := repository.GetDocumentsInfiniteScroll(cursor, limit, userId)
+	if err != nil {
+		return nil, "", err
+	}
+
+	var encodedCursor string
+	if nextCursor != nil {
+		encodedCursor, err = utility.EncodeCursor(*nextCursor)
+
+		if err != nil {
+			return nil, "", err
+		}
+	}
+
+	return documents, encodedCursor, err
 }

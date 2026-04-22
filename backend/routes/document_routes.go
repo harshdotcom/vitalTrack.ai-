@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 	"vita-track-ai/models"
 	"vita-track-ai/service"
@@ -91,5 +92,38 @@ func updateDocument(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Document Updated Successfully",
 	})
+
+}
+
+// @Summary Get Infinite Scroll Documents
+// @Tags Document
+// @Produce json
+// @Param cursor query string false "Base64 encoded cursor from previous response"
+// @Param limit query int false "Number of documents to fetch (default: 12)"
+// @Success 200 {object} models.InfiniteScrollResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /documents/infiniteScroll [get]
+func getInfiniteScroll(c *gin.Context) {
+	cursorStr := c.Query("cursor")
+	userID := c.MustGet("user_id").(int64)
+	limitStr := c.DefaultQuery("limit", "12") // Default to 12 if missing
+	limit, err := strconv.ParseInt(limitStr, 10, 64)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid limit format", "error": err.Error()})
+		return
+	}
+
+	documents, nextCursor, err := service.GetInfiniteScroll(cursorStr, userID, limit)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": documents,
+		"cursor": nextCursor})
 
 }

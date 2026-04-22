@@ -33,6 +33,58 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/documents/infiniteScroll": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Document"
+                ],
+                "summary": "Get Infinite Scroll Documents",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Base64 encoded cursor from previous response",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of documents to fetch (default: 12)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.InfiniteScrollResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/documents/update/{id}": {
             "patch": {
                 "security": [
@@ -426,6 +478,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/resend-otp": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Resend OTP",
+                "parameters": [
+                    {
+                        "description": "Email payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/users/reset-password": {
             "post": {
                 "consumes": [
@@ -591,6 +698,74 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.Document": {
+            "type": "object",
+            "properties": {
+                "analysis_generated": {
+                    "type": "boolean"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "document_date": {
+                    "type": "string"
+                },
+                "document_name": {
+                    "type": "string"
+                },
+                "file": {
+                    "$ref": "#/definitions/models.File"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tags": {
+                    "description": "JSON string",
+                    "type": "string"
+                },
+                "user_id": {
+                    "description": "ID         string    ` + "`" + `json:\"id\" gorm:\"type:uuid;default:gen_random_uuid();primaryKey\"` + "`" + `",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.File": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "fileSize": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "mimeType": {
+                    "type": "string"
+                },
+                "originalName": {
+                    "type": "string"
+                },
+                "s3Key": {
+                    "type": "string"
+                },
+                "storedName": {
+                    "type": "string"
+                },
+                "uploadedBy": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "user": {
+                    "$ref": "#/definitions/models.User"
+                }
+            }
+        },
         "models.ForgetPasswordRequest": {
             "type": "object",
             "required": [
@@ -599,6 +774,20 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string"
+                }
+            }
+        },
+        "models.InfiniteScrollResponse": {
+            "type": "object",
+            "properties": {
+                "cursor": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Document"
+                    }
                 }
             }
         },
@@ -695,8 +884,55 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 8500
                 },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2026-04-16T22:05:00+05:30"
+                },
                 "weight": {
                     "$ref": "#/definitions/models.Measurement"
+                }
+            }
+        },
+        "models.User": {
+            "type": "object",
+            "required": [
+                "email",
+                "name"
+            ],
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "description": "YYYY-MM-DD HH:MM:SS.microseconds stored in DB",
+                    "type": "string"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "google_id": {
+                    "type": "string"
+                },
+                "is_verified": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "profile_pic": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         }

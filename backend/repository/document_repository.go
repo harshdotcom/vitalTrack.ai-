@@ -126,3 +126,42 @@ func UpdateDocument(userID int64, documentId string, updateDocReq *models.Update
 	// Execute
 	return database.DB.Exec(query, args...).Error
 }
+
+func GetDocumentsInfiniteScroll(cursor *models.Cursor, limit int64, userID int64) ([]models.Document, *models.Cursor, error) {
+	var documents []models.Document
+
+	// query := database.DB.
+	// 	Where("user_id = ?", userID).
+	// 	Order("document_date DESC, id DESC").
+	// 	Limit(int(limit))
+	query := database.DB.
+		Model(&models.Document{}).
+		Where("user_id = ?", userID).
+		Order("document_date DESC, id DESC").
+		Limit(int(limit))
+
+	// Cursor condition
+	if cursor != nil {
+		query = query.Where(
+			"(document_date < ?) OR (document_date = ? AND id < ?)",
+			cursor.CreatedAt, cursor.CreatedAt, cursor.ID,
+		)
+	}
+
+	err := query.Find(&documents).Error
+	if err != nil {
+		return nil, nil, err
+	}
+	if len(documents) == 0 {
+		return documents, nil, nil
+	}
+
+	last := documents[len(documents)-1]
+
+	nextCursor := &models.Cursor{
+		CreatedAt: last.DocumentDate,
+		ID:        last.FileID,
+	}
+
+	return documents, nextCursor, nil
+}

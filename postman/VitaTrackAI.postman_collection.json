@@ -498,7 +498,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"file_id\": \"{{fileId}}\",\n  \"category\": \"Lab Test\",\n  \"report_type\": \"Blood Test\",\n  \"file_type\": \"pdf\",\n  \"tags\": [\"annual\", \"cbc\"],\n  \"report_date\": \"2026-04-14\"\n}",
+              "raw": "{\n  \"file_id\": \"{{fileId}}\",\n  \"category\": \"Lab Test\",\n  \"report_type\": \"Blood Test\",\n  \"file_type\": \"pdf\",\n  \"tags\": [\"annual\", \"cbc\"],\n  \"document_date\": \"2026-04-14\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

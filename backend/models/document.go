@@ -28,3 +28,14 @@ type UpdateDocumentRequest struct {
 	Tags         *string `form:"tags"`
 	DocumentDate *string `form:"document_date"`
 }
+
+type Cursor struct {
+	CreatedAt time.Time `json:"created_at"`
+	ID        string    `json:"id"`
+}
+
+type InfiniteScrollResponse struct {
+	Data   []Document `json:"data"`
+	Cursor string     `json:"cursor"`
+}
+

@@ -55,6 +55,7 @@ func registerDocumentRoutes(rg *gin.RouterGroup) {
 	{
 		documents.POST("", createDocument)
 		documents.GET("/:id", getDocument)
+		documents.GET("/infiniteScroll", getInfiniteScroll)
 		documents.DELETE("/:id", deleteDocument)
 		documents.POST("/calendar", getCalendarDocuments)
 		documents.PATCH("/update/:id", updateDocument)
