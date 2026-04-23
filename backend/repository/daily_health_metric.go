@@ -32,3 +32,23 @@ func DeleteHealthMetric(id string, userID int64) error {
 		Where("id = ? AND uploaded_by = ?", id, userID).
 		Delete(&models.DailyHealthMetric{}).Error
 }
+
+func GetHealthMetricsInfiniteScroll(cursor *models.Cursor, limit int64, userID int64) ([]models.DailyHealthMetric, error) {
+	var metrics []models.DailyHealthMetric
+
+	query := database.DB.
+		Model(&models.DailyHealthMetric{}).
+		Where("uploaded_by = ?", userID).
+		Order("timestamp DESC, id DESC").
+		Limit(int(limit))
+
+	if cursor != nil {
+		query = query.Where(
+			"(timestamp < ?) OR (timestamp = ? AND id < ?)",
+			cursor.CreatedAt, cursor.CreatedAt, cursor.ID,
+		)
+	}
+
+	err := query.Find(&metrics).Error
+	return metrics, err
+}

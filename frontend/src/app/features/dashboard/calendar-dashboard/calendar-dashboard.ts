@@ -1063,7 +1063,7 @@ export class CalendarDashboard implements OnInit {
 
     return rawDocuments.map((entry: any) => this.normalizeCalendarEntry({
       ...entry,
-      entry_type: 'document'
+      entry_type: entry.entry_type || 'document'
     }));
   }
 

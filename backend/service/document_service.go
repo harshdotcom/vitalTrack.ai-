@@ -226,7 +226,7 @@ func getEntryTime(value interface{}) time.Time {
 	return time.Time{}
 }
 
-func GetInfiniteScroll(cursorStr string, userId int64, limit int64) ([]models.Document, string, error) {
+func GetInfiniteScroll(cursorStr string, userId int64, limit int64) ([]gin.H, string, error) {
 	cursor, err := utility.DecodeCursor(cursorStr)
 
 	if err != nil {
@@ -240,19 +240,86 @@ func GetInfiniteScroll(cursorStr string, userId int64, limit int64) ([]models.Do
 		limit = 50
 	}
 
-	documents, nextCursor, err := repository.GetDocumentsInfiniteScroll(cursor, limit, userId)
+	documents, _, err := repository.GetDocumentsInfiniteScroll(cursor, limit, userId)
 	if err != nil {
 		return nil, "", err
 	}
 
-	var encodedCursor string
-	if nextCursor != nil {
-		encodedCursor, err = utility.EncodeCursor(*nextCursor)
+	metrics, err := repository.GetHealthMetricsInfiniteScroll(cursor, limit, userId)
+	if err != nil {
+		return nil, "", err
+	}
 
+	var combined []gin.H
+
+	for _, doc := range documents {
+		combined = append(combined, gin.H{
+			"entry_type":         "document",
+			"user_id":            doc.UserID,
+			"File":               doc.File,
+			"id":                 doc.FileID,
+			"category":           doc.Category,
+			"document_name":      doc.DocumentName,
+			"tags":               doc.Tags,
+			"status":             doc.Status,
+			"document_date":      doc.DocumentDate,
+			"analysis_generated": doc.AnalysisGenerated,
+		})
+	}
+
+	for _, metric := range metrics {
+		combined = append(combined, gin.H{
+			"entry_type":         "direct_entry",
+			"id":                 metric.ID,
+			"user_id":            metric.UploadedBy,
+			"category":           "Direct Entry",
+			"document_name":      metric.MetricLabel(),
+			"status":             "logged",
+			"document_date":      metric.Timestamp,
+			"analysis_generated": false,
+			"timestamp":          metric.Timestamp,
+			"metric_type":        metric.MetricType(),
+			"metric_label":       metric.MetricLabel(),
+			"metric_summary":     metric.MetricSummary(),
+			"heart_rate":         metric.HeartRate,
+			"weight":             metric.Weight,
+			"blood_pressure":     metric.BloodPressure,
+			"blood_sugar":        metric.BloodSugar,
+			"notes":              metric.Notes,
+			"sleep_hours":        metric.SleepHours,
+			"steps":              metric.Steps,
+			"calories":           metric.Calories,
+			"oxygen_level":       metric.OxygenLevel,
+		})
+	}
+
+	sort.Slice(combined, func(i, j int) bool {
+		timeI := getEntryTime(combined[i]["document_date"])
+		timeJ := getEntryTime(combined[j]["document_date"])
+		if timeI.Equal(timeJ) {
+			idI := combined[i]["id"].(string)
+			idJ := combined[j]["id"].(string)
+			return idI > idJ
+		}
+		return timeI.After(timeJ)
+	})
+
+	if int64(len(combined)) > limit {
+		combined = combined[:limit]
+	}
+
+	var encodedCursor string
+	if len(combined) > 0 {
+		lastItem := combined[len(combined)-1]
+		nextCursor := models.Cursor{
+			CreatedAt: getEntryTime(lastItem["document_date"]),
+			ID:        lastItem["id"].(string),
+		}
+		encodedCursor, err = utility.EncodeCursor(nextCursor)
 		if err != nil {
 			return nil, "", err
 		}
 	}
 
-	return documents, encodedCursor, err
+	return combined, encodedCursor, nil
 }

@@ -7,7 +7,7 @@ import (
 )
 
 func SendEmail(to string, otp string) error {
-	from := os.Getenv("SMTP_EMAIL")       // sender "From" address (your Gmail)
+	from := os.Getenv("SMTP_EMAIL")        // sender "From" address (your Gmail)
 	username := os.Getenv("SMTP_USERNAME") // Brevo SMTP login (a802b7001@smtp-brevo.com)
 	password := os.Getenv("SMTP_PASSWORD") // Brevo SMTP key
 	host := os.Getenv("SMTP_HOST")

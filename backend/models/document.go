@@ -38,4 +38,3 @@ type InfiniteScrollResponse struct {
 	Data   []Document `json:"data"`
 	Cursor string     `json:"cursor"`
 }
-
