@@ -244,7 +244,9 @@
                     <div class="timeline-marker">
                         <span></span>
                     </div>
-                    <button type="button" class="timeline-card" (click)="openDocumentDetails(entry.id)">
+                    <button type="button" class="timeline-card" 
+                            [style.cursor]="isDirectEntry(entry) ? 'default' : 'pointer'"
+                            (click)="isDirectEntry(entry) ? null : openDocumentDetails(entry.id)">
                         <span class="timeline-card__date">{{ entry.document_date | date:'mediumDate' }}</span>
                         <span class="timeline-card__title">{{ getEntryTitle(entry) }}</span>
                         <span class="timeline-card__meta">{{ getEntrySummary(entry) }}</span>
