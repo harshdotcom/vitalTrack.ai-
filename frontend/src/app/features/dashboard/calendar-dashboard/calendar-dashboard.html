@@ -138,29 +138,43 @@
         </div>
     </header>
 
-    <!-- Calendar Section -->
+    <!-- Calendar / Timeline Section -->
     <main class="calendar-wrapper">
         <div class="calendar-toolbar">
-            <div style="display: flex; align-items: center; gap: 16px;">
+            <div class="dashboard-view-heading">
                 <h2>
-                    {{ currentMonthName }}
+                    {{ viewMode === 'calendar' ? currentMonthName : 'Document Timeline' }}
                     <span *ngIf="isLoading"
+                        style="font-size: 0.875rem; color: var(--primary); font-weight: normal; margin-left: 8px;">Loading...</span>
+                    <span *ngIf="viewMode === 'timeline' && isTimelineLoading"
                         style="font-size: 0.875rem; color: var(--primary); font-weight: normal; margin-left: 8px;">Loading...</span>
 
                 </h2>
-                <div *ngIf="!isLoading && !hasReportsForCurrentMonth" class="empty-state-note">
+                <div *ngIf="viewMode === 'calendar' && !isLoading && !hasReportsForCurrentMonth" class="empty-state-note">
                     No entries found.
                 </div>
             </div>
-            <div class="calendar-nav">
-                <button class="btn-icon" (click)="previousMonth()" [disabled]="isLoading">&larr;</button>
-                <button class="btn-icon" (click)="nextMonth()"
-                    [disabled]="isLoading || isNextMonthDisabled">&rarr;</button>
+            <div class="dashboard-view-actions">
+                <div class="view-toggle" aria-label="Dashboard view">
+                    <button type="button" class="view-toggle__button" [class.active]="viewMode === 'calendar'"
+                        (click)="setViewMode('calendar')">
+                        Calendar
+                    </button>
+                    <button type="button" class="view-toggle__button" [class.active]="viewMode === 'timeline'"
+                        (click)="setViewMode('timeline')">
+                        Timeline
+                    </button>
+                </div>
+                <div class="calendar-nav" *ngIf="viewMode === 'calendar'">
+                    <button class="btn-icon" (click)="previousMonth()" [disabled]="isLoading">&larr;</button>
+                    <button class="btn-icon" (click)="nextMonth()"
+                        [disabled]="isLoading || isNextMonthDisabled">&rarr;</button>
+                </div>
             </div>
         </div>
 
         <!-- Always display the grid structure so it doesn't jump or look broken -->
-        <div class="calendar" [style.opacity]="isLoading ? '0.7' : '1'">
+        <div class="calendar" *ngIf="viewMode === 'calendar'" [style.opacity]="isLoading ? '0.7' : '1'">
             <div class="calendar-header">
                 <div class="weekday" *ngFor="let day of weekDays">{{ day }}</div>
             </div>
@@ -209,6 +223,61 @@
                         {{ getEntryCountLabel(cell.documents) }}
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="timeline-panel" *ngIf="viewMode === 'timeline'" (scroll)="onTimelineScroll($event)">
+            <div class="timeline-state" *ngIf="isTimelineLoading">
+                <span class="loader-dark"></span>
+            </div>
+
+            <div class="api-error" *ngIf="timelineError && !isTimelineLoading">
+                {{ timelineError }}
+            </div>
+
+            <div class="timeline-empty" *ngIf="!isTimelineLoading && !timelineError && timelineEntries.length === 0">
+                No documents found.
+            </div>
+
+            <div class="timeline-list" *ngIf="timelineEntries.length > 0">
+                <div class="timeline-item" *ngFor="let entry of timelineEntries">
+                    <div class="timeline-marker">
+                        <span></span>
+                    </div>
+                    <button type="button" class="timeline-card" (click)="openDocumentDetails(entry.id)">
+                        <span class="timeline-card__date">{{ entry.document_date | date:'mediumDate' }}</span>
+                        <span class="timeline-card__title">{{ getEntryTitle(entry) }}</span>
+                        <span class="timeline-card__meta">{{ getEntrySummary(entry) }}</span>
+                        <span class="timeline-card__footer">
+                            <span class="status-badge" [ngClass]="entry.status">{{ entry.status }}</span>
+                            <span *ngIf="entry.analysis_generated" class="timeline-ai-ready">AI Ready</span>
+                        </span>
+                    </button>
+                    <button type="button" class="timeline-delete" title="Delete" aria-label="Delete document"
+                        (click)="openDeleteModal(entry); $event.stopPropagation()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path
+                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="timeline-load-more" *ngIf="timelineEntries.length > 0">
+                <span *ngIf="isTimelineLoadingMore" class="loader-dark timeline-loader"></span>
+                <button *ngIf="!isTimelineLoadingMore && hasMoreTimelineEntries" type="button" class="btn-secondary"
+                    (click)="loadTimelinePage(false)">
+                    Load more
+                </button>
+                <span *ngIf="!isTimelineLoadingMore && !hasMoreTimelineEntries" class="timeline-end">
+                    All documents loaded
+                </span>
             </div>
         </div>
     </main>

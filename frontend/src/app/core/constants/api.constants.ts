@@ -13,6 +13,9 @@ export const API_CONSTANTS = {
   get DOCUMENTS_CALENDAR_URL() {
     return `${this.BASE_URL}/documents/calendar`;
   },
+  get DOCUMENTS_INFINITE_SCROLL_URL() {
+    return `${this.BASE_URL}/documents/infiniteScroll`;
+  },
   get FILES_UPLOAD_URL() {
     return `${this.BASE_URL}/files/upload`;
   },
