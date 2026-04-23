@@ -13,6 +13,18 @@ export class DocumentService {
     return this.http.post(API_CONSTANTS.DOCUMENTS_CALENDAR_URL, { month, year });
   }
 
+  getInfiniteScrollDocuments(cursor = '', limit = 12): Observable<any> {
+    const params: Record<string, string> = {
+      limit: String(limit)
+    };
+
+    if (cursor) {
+      params['cursor'] = cursor;
+    }
+
+    return this.http.get(API_CONSTANTS.DOCUMENTS_INFINITE_SCROLL_URL, { params });
+  }
+
   uploadFile(file: File, fileType: string): Observable<any> {
     const formData = new FormData();
     formData.append('files', file);

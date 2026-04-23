@@ -29,6 +29,8 @@ interface CalendarDay {
   documents: CalendarEntry[];
 }
 
+type DashboardViewMode = 'calendar' | 'timeline';
+
 @Component({
   selector: 'app-calendar-dashboard',
   standalone: true,
@@ -46,6 +48,7 @@ export class CalendarDashboard implements OnInit {
   private toastService = inject(ToastService);
 
   currentDate = new Date();
+  viewMode: DashboardViewMode = 'calendar';
   calendarGrid: CalendarDay[] = [];
   weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   
@@ -53,6 +56,14 @@ export class CalendarDashboard implements OnInit {
   reportsMap: { [key: string]: CalendarEntry[] } = {};
 
   isLoading = true;
+
+  timelineEntries: CalendarEntry[] = [];
+  timelineCursor = '';
+  timelineLimit = 12;
+  isTimelineLoading = false;
+  isTimelineLoadingMore = false;
+  hasMoreTimelineEntries = true;
+  timelineError = '';
 
   // Day Modal State (For "+X more" clicks)
   isDayModalOpen = false;
@@ -173,6 +184,62 @@ export class CalendarDashboard implements OnInit {
 
   get hasReportsForCurrentMonth(): boolean {
     return Object.keys(this.reportsMap).length > 0;
+  }
+
+  setViewMode(mode: DashboardViewMode) {
+    this.viewMode = mode;
+
+    if (mode === 'timeline' && this.timelineEntries.length === 0 && !this.isTimelineLoading) {
+      this.loadTimelinePage(true);
+    }
+  }
+
+  loadTimelinePage(reset = false) {
+    if (reset) {
+      this.timelineEntries = [];
+      this.timelineCursor = '';
+      this.hasMoreTimelineEntries = true;
+      this.timelineError = '';
+      this.isTimelineLoading = true;
+    } else {
+      if (this.isTimelineLoadingMore || !this.hasMoreTimelineEntries) {
+        return;
+      }
+      this.isTimelineLoadingMore = true;
+    }
+
+    this.documentService.getInfiniteScrollDocuments(this.timelineCursor, this.timelineLimit).subscribe({
+      next: (response) => {
+        const documents = this.extractTimelineDocuments(response);
+        const nextCursor = this.extractTimelineCursor(response);
+
+        this.timelineEntries = reset
+          ? documents
+          : [...this.timelineEntries, ...documents];
+        this.timelineCursor = nextCursor;
+        this.hasMoreTimelineEntries = !!nextCursor && documents.length >= this.timelineLimit;
+        this.isTimelineLoading = false;
+        this.isTimelineLoadingMore = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching timeline', err);
+        this.timelineError = err?.error?.message || 'Failed to load timeline.';
+        this.toastService.showError(this.timelineError);
+        this.isTimelineLoading = false;
+        this.isTimelineLoadingMore = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  onTimelineScroll(event: Event) {
+    const target = event.target as HTMLElement;
+    const distanceFromBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
+
+    if (distanceFromBottom < 160) {
+      this.loadTimelinePage(false);
+    }
   }
 
   previousMonth() {
@@ -434,6 +501,9 @@ export class CalendarDashboard implements OnInit {
         this.closeVitalsModal();
         this.toastService.showSuccess('Vital entry saved successfully');
         this.fetchMonthData();
+        if (this.viewMode === 'timeline') {
+          this.loadTimelinePage(true);
+        }
       },
       error: (err) => {
         this.isSavingVitals = false;
@@ -511,6 +581,9 @@ export class CalendarDashboard implements OnInit {
               this.isUploading = false;
               this.closeUploadModal();
               this.fetchMonthData(); // Refresh calendar to show new document
+              if (this.viewMode === 'timeline') {
+                this.loadTimelinePage(true);
+              }
               this.fetchStorageUsage(); // Refresh storage limit
             },
             error: (err) => {
@@ -664,6 +737,9 @@ export class CalendarDashboard implements OnInit {
         this.reportsMap = {};
         this.generateCalendar();
         this.fetchMonthData();
+        if (this.viewMode === 'timeline') {
+          this.loadTimelinePage(true);
+        }
         this.fetchStorageUsage(); // Refresh storage limit
         
         // If the day modal was open, securely close it to prevent orphaned data
@@ -870,6 +946,9 @@ export class CalendarDashboard implements OnInit {
         this.toastService.showSuccess('Document updated successfully');
         this.openDocumentDetails(this.selectedDocDetails.id);
         this.fetchMonthData();
+        if (this.viewMode === 'timeline') {
+          this.loadTimelinePage(true);
+        }
       },
       error: (err: any) => {
         this.isUpdatingDocument = false;
@@ -964,5 +1043,40 @@ export class CalendarDashboard implements OnInit {
       timestamp: entry?.timestamp,
       tags: entry?.tags
     };
+  }
+
+  private extractTimelineDocuments(response: any): CalendarEntry[] {
+    let rawDocuments = response?.data ?? response?.documents ?? response;
+
+    if (typeof response === 'string') {
+      try {
+        const parsed = JSON.parse(response);
+        rawDocuments = parsed?.data ?? parsed?.documents ?? parsed;
+      } catch (e) {
+        console.warn('Could not parse timeline response string', e);
+      }
+    }
+
+    if (!Array.isArray(rawDocuments)) {
+      return [];
+    }
+
+    return rawDocuments.map((entry: any) => this.normalizeCalendarEntry({
+      ...entry,
+      entry_type: 'document'
+    }));
+  }
+
+  private extractTimelineCursor(response: any): string {
+    if (typeof response === 'string') {
+      try {
+        const parsed = JSON.parse(response);
+        return parsed?.cursor || parsed?.data?.cursor || '';
+      } catch (e) {
+        return '';
+      }
+    }
+
+    return response?.cursor || response?.data?.cursor || '';
   }
 }
