@@ -68,6 +68,23 @@
                 </div>
             </div>
 
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="dob">Date of Birth</label>
+                    <input id="dob" type="date" formControlName="dob" placeholder="YYYY-MM-DD">
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" formControlName="gender">
+                        <option value="">Select gender</option>
+                        <option *ngFor="let option of genderOptions" [value]="option.value">
+                            {{ option.label }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
             <div class="form-actions">
                 <!-- Error message block -->
                 <div class="api-error" *ngIf="errorMessage">
@@ -97,6 +114,6 @@
 
     <!-- Trademark and Credits -->
     <div class="global-footer">
-        <p>Developed with ❤️ by the ByIITians team.</p>
+        <p>Designed and built by the ByIITians team.</p>
     </div>
 </div>

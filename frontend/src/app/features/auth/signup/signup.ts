@@ -28,13 +28,21 @@ export class Signup {
   signupForm: FormGroup = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    dob: [''],
+    gender: ['']
   });
 
   isLoading = false;
   isGoogleLoading = false;
   errorMessage = '';
   showPassword = false;
+  readonly genderOptions = [
+    { value: 'Male', label: 'Male' },
+    { value: 'Female', label: 'Female' },
+    { value: 'Other', label: 'Other' },
+    { value: 'Prefer not to say', label: 'Prefer not to say' },
+  ];
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
@@ -49,7 +57,14 @@ export class Signup {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const userData = this.signupForm.getRawValue();
+    const rawValue = this.signupForm.getRawValue();
+    const userData = {
+      name: rawValue.name,
+      email: rawValue.email,
+      password: rawValue.password,
+      dob: rawValue.dob || null,
+      gender: rawValue.gender || null,
+    };
 
     this.authService.signup(userData).subscribe({
       next: (_response) => {

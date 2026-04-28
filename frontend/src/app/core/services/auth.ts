@@ -52,11 +52,19 @@ export class AuthService {
     );
   }
 
-  signup(userData: {name: string, email: string, password: string}): Observable<any> {
+  signup(userData: { name: string; email: string; password: string; dob?: string | null; gender?: string | null }): Observable<any> {
     const formData = new FormData();
     formData.append('name', userData.name);
     formData.append('email', userData.email);
     formData.append('password', userData.password);
+
+    if (userData.dob) {
+      formData.append('dob', userData.dob);
+    }
+
+    if (userData.gender) {
+      formData.append('gender', userData.gender);
+    }
     
     return this.http.post(API_CONSTANTS.SIGNUP_URL, formData);
   }
