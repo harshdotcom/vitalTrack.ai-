@@ -71,7 +71,12 @@ export class DetailsView implements OnInit, OnDestroy {
                 this.rawFileUrl = fileData.url;
                 if (this.isPdfFile()) {
                   fetch(this.rawFileUrl)
-                    .then(res => res.blob())
+                    .then(res => {
+                      if (!res.ok) {
+                        throw new Error(`Preview fetch failed with status ${res.status}`);
+                      }
+                      return res.blob();
+                    })
                     .then(blob => {
                       const pdfBlob = new Blob([blob], { type: 'application/pdf' });
                       this.pdfBlobUrl = URL.createObjectURL(pdfBlob);
@@ -162,14 +167,31 @@ export class DetailsView implements OnInit, OnDestroy {
   }
 
   isImageFile(): boolean {
-    if (!this.rawFileUrl) return false;
-    const url = this.rawFileUrl.toLowerCase().split('?')[0];
-    return url.endsWith('.png') || url.endsWith('.jpg') || url.endsWith('.jpeg');
+    const fileReference = this.getFileReference();
+    if (!fileReference) return false;
+
+    const lowerRef = fileReference.toLowerCase();
+    if (lowerRef.startsWith('image/')) return true;
+
+    const valueWithoutParams = lowerRef.split('?')[0];
+    return valueWithoutParams.endsWith('.png') || valueWithoutParams.endsWith('.jpg') || valueWithoutParams.endsWith('.jpeg');
   }
 
   isPdfFile(): boolean {
-    if (!this.rawFileUrl) return false;
-    return this.rawFileUrl.toLowerCase().split('?')[0].endsWith('.pdf');
+    const fileReference = this.getFileReference();
+    if (!fileReference) return false;
+
+    const lowerRef = fileReference.toLowerCase();
+    if (lowerRef === 'application/pdf') return true;
+
+    return lowerRef.split('?')[0].endsWith('.pdf');
+  }
+
+  private getFileReference(): string {
+    return this.rawFileUrl
+      || this.docDetails?.File?.OriginalName
+      || this.docDetails?.File?.MimeType
+      || '';
   }
 
   parseTags(tags: string | string[]): string[] {

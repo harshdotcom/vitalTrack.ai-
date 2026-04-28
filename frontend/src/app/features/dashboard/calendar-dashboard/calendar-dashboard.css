@@ -25,6 +25,18 @@
     justify-content: flex-end;
 }
 
+.header-metrics,
+.header-controls,
+.header-icon-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-controls {
+    margin-left: auto;
+}
+
 .header-title {
     display: flex;
     align-items: center;
@@ -64,6 +76,14 @@
     cursor: default;
     transition: border-color 0.2s, color 0.2s;
     user-select: none;
+}
+
+.storage-chip svg {
+    flex-shrink: 0;
+}
+
+.storage-chip span {
+    min-width: 0;
 }
 
 .storage-chip:hover {
@@ -884,6 +904,11 @@ select {
     font-weight: 600;
 }
 
+.header-action-button--new {
+    min-width: 148px;
+    white-space: nowrap;
+}
+
 .header-action-button--danger {
     color: var(--error-text);
     border-color: var(--error-border);
@@ -1163,32 +1188,74 @@ select {
         flex-direction: column;
         padding: 16px;
         align-items: stretch;
-        gap: 16px;
+        gap: 14px;
+    }
+
+    .brand-logo {
+        justify-content: flex-start;
     }
 
     .header-actions {
         width: 100%;
-        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .header-metrics {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .header-controls {
+        width: 100%;
+        margin-left: 0;
         justify-content: space-between;
         gap: 12px;
     }
 
-    .header-actions button {
-        flex: 1;
+    .header-icon-actions {
+        flex-shrink: 0;
+        gap: 8px;
+    }
+
+    .header-icon-actions > * {
+        flex-shrink: 0;
+    }
+
+    .header-icon-actions app-theme-toggle {
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 48px;
-        padding: 0 8px;
-        margin: 0;
-        font-size: 0.85rem;
-        font-weight: 600;
-        border-radius: var(--radius-md);
+    }
+
+    .storage-chip {
+        min-width: 0;
+        justify-content: center;
+        padding: 10px 12px;
+    }
+
+    .storage-chip > span {
+        overflow: hidden;
+        text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    .header-action-button {
+    .header-action-button--new {
+        flex: 1;
         min-width: 0;
+        height: 44px;
+        padding: 0 14px;
+        border-radius: 14px;
+        font-size: 0.9rem;
+    }
+
+    .btn-icon-secondary,
+    .btn-icon-logout {
+        width: 40px;
+        min-width: 40px;
+        height: 40px;
     }
 
     .calendar-wrapper {
@@ -1198,23 +1265,22 @@ select {
 
     /* Toolbar adjustments */
     .calendar-toolbar {
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-between;
+        flex-direction: column;
+        align-items: stretch;
         gap: 12px;
     }
 
     .dashboard-view-heading {
-        flex: 1;
-        flex-direction: row !important;
-        align-items: center !important;
-        gap: 8px !important;
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
     }
 
     .dashboard-view-actions {
         width: 100%;
         justify-content: space-between;
+        gap: 12px;
     }
 
     .view-toggle {
@@ -1234,7 +1300,7 @@ select {
     .empty-state-note {
         padding: 4px 10px;
         font-size: 0.75rem;
-        white-space: nowrap;
+        white-space: normal;
     }
 
     .calendar-nav {
@@ -1271,7 +1337,7 @@ select {
 
     .calendar-cell {
         padding: 4px;
-        min-height: 70px;
+        min-height: 74px;
         /* Ensure cells don't stretch unevenly */
         display: flex;
         flex-direction: column;
@@ -1298,7 +1364,7 @@ select {
     /* Show mobile indicator */
     .mobile-indicator {
         display: block;
-        font-size: 0.65rem;
+        font-size: 0.63rem;
         color: var(--primary);
         font-weight: 700;
         text-align: center;
@@ -1415,6 +1481,77 @@ select {
     .fullscreen-close {
         top: 10px;
         right: 15px;
+    }
+}
+
+@media (max-width: 520px) {
+    .dashboard-header {
+        padding: 14px 14px 16px;
+    }
+
+    .brand-logo {
+        gap: 8px;
+    }
+
+    .header-metrics {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .storage-chip {
+        font-size: 0.95rem;
+    }
+
+    .header-controls {
+        align-items: stretch;
+    }
+
+    .header-action-button--new {
+        font-size: 0.86rem;
+        gap: 6px;
+        padding: 0 12px;
+    }
+
+    .dashboard-view-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .view-toggle {
+        width: 100%;
+    }
+
+    .calendar-nav {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .calendar-toolbar h2 {
+        font-size: 1.05rem;
+    }
+
+    .weekday {
+        padding: 10px 2px;
+        font-size: 0.66rem;
+        letter-spacing: 0.02em;
+    }
+
+    .calendar-body {
+        grid-auto-rows: minmax(78px, auto);
+    }
+
+    .calendar-cell {
+        min-height: 78px;
+        padding: 4px 3px;
+    }
+
+    .date-number {
+        font-size: 0.82rem;
+    }
+
+    .mobile-indicator {
+        font-size: 0.6rem;
+        padding: 2px 3px;
     }
 }
 

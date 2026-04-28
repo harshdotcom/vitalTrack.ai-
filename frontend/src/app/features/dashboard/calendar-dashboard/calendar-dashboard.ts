@@ -802,8 +802,9 @@ export class CalendarDashboard implements OnInit {
             parsedTags: this.parseTags(docData.tags)
           };
 
-          if (docData && docData.id) {
-            this.documentService.getFileUrl(docData.id).subscribe({
+          const fileId = docData?.file_id || docData?.id;
+          if (fileId) {
+            this.documentService.getFileUrl(fileId).subscribe({
               next: (fileRes) => {
                 try {
                   let fileData = fileRes;
@@ -822,7 +823,12 @@ export class CalendarDashboard implements OnInit {
                       // Fetch the PDF directly and construct a Blob URL so the browser renders it inline
                       // and bypasses S3's rigid Content-Disposition: attachment headers
                       fetch(this.rawFileUrl)
-                        .then(res => res.blob())
+                        .then(res => {
+                          if (!res.ok) {
+                            throw new Error(`Preview fetch failed with status ${res.status}`);
+                          }
+                          return res.blob();
+                        })
                         .then(blob => {
                             const pdfBlob = new Blob([blob], { type: 'application/pdf' });
                             this.pdfBlobUrl = URL.createObjectURL(pdfBlob);
@@ -849,7 +855,6 @@ export class CalendarDashboard implements OnInit {
                   }
                 } catch(e) {
                   this.detailsError = 'Failed to map file URL data.';
-                } finally {
                   this.isDetailsLoading = false;
                   this.cdr.detectChanges();
                 }
@@ -1002,17 +1007,31 @@ export class CalendarDashboard implements OnInit {
   }
 
   isImageFile(): boolean {
-    if (!this.rawFileUrl) return false;
-    const lowerUrl = this.rawFileUrl.toLowerCase();
-    const urlWithoutParams = lowerUrl.split('?')[0];
-    return urlWithoutParams.endsWith('.png') || urlWithoutParams.endsWith('.jpg') || urlWithoutParams.endsWith('.jpeg');
+    const fileReference = this.getFileReference();
+    if (!fileReference) return false;
+
+    const lowerRef = fileReference.toLowerCase();
+    if (lowerRef.startsWith('image/')) return true;
+
+    const valueWithoutParams = lowerRef.split('?')[0];
+    return valueWithoutParams.endsWith('.png') || valueWithoutParams.endsWith('.jpg') || valueWithoutParams.endsWith('.jpeg');
   }
 
   isPdfFile(): boolean {
-    if (!this.rawFileUrl) return false;
-    const lowerUrl = this.rawFileUrl.toLowerCase();
-    const urlWithoutParams = lowerUrl.split('?')[0];
-    return urlWithoutParams.endsWith('.pdf');
+    const fileReference = this.getFileReference();
+    if (!fileReference) return false;
+
+    const lowerRef = fileReference.toLowerCase();
+    if (lowerRef === 'application/pdf') return true;
+
+    return lowerRef.split('?')[0].endsWith('.pdf');
+  }
+
+  private getFileReference(): string {
+    return this.rawFileUrl
+      || this.selectedDocDetails?.File?.OriginalName
+      || this.selectedDocDetails?.File?.MimeType
+      || '';
   }
 
   parseTags(tags: string | string[]): string[] {
