@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -434,80 +433,22 @@ func googleLogin(context *gin.Context) {
 		return
 	}
 
-	payload, err := utility.VerifyGoogkeIDTokenAndGetPayLoad(req.Token)
-
+	userResponse, token, err := service.AuthenticateGoogleUser(req.Token)
 	if err != nil {
-		context.JSON(401, gin.H{
-			"message": "Invalid google token",
-			"error":   err.Error(),
-		})
+		statusCode := http.StatusInternalServerError
+		message := "Google login failed"
 
-		return
-	}
-
-	claims := payload.Claims
-
-	email := utility.GetClaim("email", claims)
-	name := utility.GetClaim("name", claims)
-	picture := utility.GetClaim("picture", claims)
-	googleId := payload.Subject
-
-	var userModel models.User
-	userModel, err = repository.GetUserModelByEmail(email)
-
-	if err == sql.ErrNoRows {
-		userModel.Email = email
-		userModel.Name = name
-		userModel.ProfilePic = &picture
-		userModel.GoogleId = &googleId
-		_, err = repository.SaveUser(&userModel)
-
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"message": "Problem in saving the user",
-				"error":   err.Error(),
-			})
-			return
+		switch {
+		case errors.Is(err, service.ErrInvalidGoogleToken), errors.Is(err, service.ErrGoogleEmailNotVerified), errors.Is(err, service.ErrGoogleEmailUnavailable):
+			statusCode = http.StatusUnauthorized
+			message = err.Error()
+		case errors.Is(err, service.ErrGoogleTokenNotConfigured):
+			statusCode = http.StatusServiceUnavailable
+			message = err.Error()
 		}
 
-	} else if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Some issue with the database",
-			"error":   err.Error(),
-		})
-
-		return
-	}
-
-	if userModel.GoogleId == nil {
-		userModel.GoogleId = &googleId
-		err = repository.UpdateGoogleId(&userModel)
-
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"message": "Some problem in updating the google id",
-				"error":   err.Error(),
-			})
-
-			return
-		}
-	}
-
-	token, err := utility.GenerateToken(userModel.Email, userModel.UserId)
-
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Some problem with generating the token",
-			"error":   err.Error(),
-		})
-
-		return
-	}
-
-	userResponse, err := service.BuildUserResponse(userModel)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Some problem preparing the user response",
+		context.JSON(statusCode, gin.H{
+			"message": message,
 			"error":   err.Error(),
 		})
 		return

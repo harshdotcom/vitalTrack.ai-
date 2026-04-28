@@ -1,0 +1,63 @@
+.google-auth {
+  margin-top: 14px;
+}
+
+.google-auth__divider {
+  position: relative;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.google-auth__divider::before {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto;
+  border-top: 1px solid color-mix(in srgb, var(--text-muted) 24%, transparent);
+}
+
+.google-auth__divider span {
+  position: relative;
+  display: inline-block;
+  padding: 0 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--glass-surface) 92%, transparent);
+}
+
+.google-auth__button-shell {
+  position: relative;
+  min-height: 40px;
+}
+
+.google-auth__button-host {
+  display: flex;
+  justify-content: center;
+}
+
+.google-auth__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--surface-color) 72%, transparent);
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.google-auth__button-shell--busy .google-auth__button-host {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.google-auth__error {
+  margin-top: 8px;
+  text-align: center;
+  color: var(--error);
+  font-size: 0.82rem;
+}

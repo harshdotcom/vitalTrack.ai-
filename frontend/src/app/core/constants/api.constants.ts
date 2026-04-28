@@ -10,6 +10,9 @@ export const API_CONSTANTS = {
   get SIGNUP_URL() {
     return `${this.BASE_URL}/users/signup`;
   },
+  get GOOGLE_LOGIN_URL() {
+    return `${this.BASE_URL}/users/google`;
+  },
   get DOCUMENTS_CALENDAR_URL() {
     return `${this.BASE_URL}/documents/calendar`;
   },

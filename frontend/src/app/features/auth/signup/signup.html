@@ -74,10 +74,18 @@
                     {{ errorMessage }}
                 </div>
 
-                <button type="submit" class="btn-primary full-width" [disabled]="isLoading">
+                <button type="submit" class="btn-primary full-width" [disabled]="isLoading || isGoogleLoading">
                     <span *ngIf="!isLoading">Sign Up</span>
                     <span *ngIf="isLoading" class="loader"></span>
                 </button>
+
+                <app-google-signin-button
+                    [clientId]="googleClientId"
+                    [context]="'signup'"
+                    [disabled]="isLoading || isGoogleLoading"
+                    (credentialReceived)="onGoogleCredential($event)"
+                    (initializationFailed)="onGoogleInitializationFailed($event)">
+                </app-google-signin-button>
             </div>
 
         </form>

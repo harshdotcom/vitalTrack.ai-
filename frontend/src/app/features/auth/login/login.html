@@ -72,6 +72,14 @@
                     <span *ngIf="!isLoading">Log In</span>
                     <span *ngIf="isLoading" class="loader"></span>
                 </button>
+
+                <app-google-signin-button
+                    [clientId]="googleClientId"
+                    [context]="'signin'"
+                    [disabled]="isLoading || isGoogleLoading"
+                    (credentialReceived)="onGoogleCredential($event)"
+                    (initializationFailed)="onGoogleInitializationFailed($event)">
+                </app-google-signin-button>
             </div>
 
         </form>

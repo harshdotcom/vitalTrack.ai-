@@ -85,6 +85,26 @@ func UpdateGoogleId(u *models.User) error {
 	return err
 }
 
+func UpdateGoogleAccount(userModel *models.User) error {
+	now := time.Now()
+	updates := map[string]interface{}{
+		"google_id":   userModel.GoogleId,
+		"is_verified": userModel.IsVerified,
+		"name":        userModel.Name,
+		"profile_pic": userModel.LegacyProfilePic,
+		"updated_at":  now,
+	}
+
+	if err := database.DB.Model(&models.User{}).
+		Where("user_id = ?", userModel.UserId).
+		Updates(updates).Error; err != nil {
+		return err
+	}
+
+	userModel.UpdatedAt = now
+	return database.DB.Preload("ProfileImage").Where("user_id = ?", userModel.UserId).First(userModel).Error
+}
+
 // func UpdateUser(u *models.User) error {
 // 	return database.DB.Model(&models.User{}).
 // 		Where("user_id = ?", u.UserId).

@@ -1,17 +1,18 @@
 import { Component, inject, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { ToastService } from '../../../core/services/toast';
 import { finalize } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ThemeToggleComponent } from '../../../core/components/theme-toggle/theme-toggle';
+import { GoogleSigninButtonComponent } from '../../../core/components/google-signin-button/google-signin-button';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, ThemeToggleComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ThemeToggleComponent, GoogleSigninButtonComponent],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -19,6 +20,7 @@ export class Login implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private toastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -33,8 +35,10 @@ export class Login implements OnInit {
   });
 
   readonly emailVerificationEnabled = environment.emailVerificationEnabled;
+  readonly googleClientId = environment.googleClientId;
 
   isLoading = false;
+  isGoogleLoading = false;
   isForgotPasswordOpen = false;
   isOtpRequested = false;
   isForgotPasswordLoading = false;
@@ -168,10 +172,8 @@ export class Login implements OnInit {
     this.errorMessage = '';
 
     this.authService.login(this.loginForm.getRawValue()).subscribe({
-      next: (response) => {
-        // Handle success (e.g., store token, navigate)
-        console.log('Login successful', response);
-        this.router.navigate(['/dashboard']);
+      next: () => {
+        this.navigateAfterAuth();
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -184,5 +186,37 @@ export class Login implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  onGoogleCredential(token: string): void {
+    this.isGoogleLoading = true;
+    this.errorMessage = '';
+
+    this.authService.googleLogin({ token }).pipe(
+      finalize(() => {
+        this.isGoogleLoading = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      next: () => {
+        this.toastService.showSuccess('Signed in with Google.');
+        this.navigateAfterAuth();
+      },
+      error: (err) => {
+        const errMsg = err.error?.message || 'Google login failed. Please try again.';
+        this.errorMessage = errMsg;
+        this.toastService.showError(errMsg);
+      }
+    });
+  }
+
+  onGoogleInitializationFailed(message: string): void {
+    this.errorMessage = message;
+    this.cdr.detectChanges();
+  }
+
+  private navigateAfterAuth(): void {
+    const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
+    void this.router.navigateByUrl(redirectTo || '/dashboard');
   }
 }

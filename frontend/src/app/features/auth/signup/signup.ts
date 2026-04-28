@@ -4,13 +4,15 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { ToastService } from '../../../core/services/toast';
+import { finalize } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ThemeToggleComponent } from '../../../core/components/theme-toggle/theme-toggle';
+import { GoogleSigninButtonComponent } from '../../../core/components/google-signin-button/google-signin-button';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, ThemeToggleComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ThemeToggleComponent, GoogleSigninButtonComponent],
   templateUrl: './signup.html',
   styleUrl: './signup.css',
 })
@@ -20,6 +22,7 @@ export class Signup {
   private router = inject(Router);
   private toastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
+  readonly googleClientId = environment.googleClientId;
 
   // Form group for Name, Email, Password
   signupForm: FormGroup = this.fb.nonNullable.group({
@@ -29,6 +32,7 @@ export class Signup {
   });
 
   isLoading = false;
+  isGoogleLoading = false;
   errorMessage = '';
   showPassword = false;
 
@@ -73,5 +77,32 @@ export class Signup {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  onGoogleCredential(token: string): void {
+    this.isGoogleLoading = true;
+    this.errorMessage = '';
+
+    this.authService.googleLogin({ token }).pipe(
+      finalize(() => {
+        this.isGoogleLoading = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      next: () => {
+        this.toastService.showSuccess('Signed in with Google.');
+        void this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        const errMsg = err.error?.message || 'Google sign-up failed. Please try again.';
+        this.errorMessage = errMsg;
+        this.toastService.showError(errMsg);
+      }
+    });
+  }
+
+  onGoogleInitializationFailed(message: string): void {
+    this.errorMessage = message;
+    this.cdr.detectChanges();
   }
 }

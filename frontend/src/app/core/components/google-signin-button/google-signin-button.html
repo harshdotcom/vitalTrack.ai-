@@ -1,0 +1,14 @@
+<section class="google-auth" *ngIf="clientId">
+  <div class="google-auth__divider">
+    <span>or continue with</span>
+  </div>
+
+  <div class="google-auth__button-shell" [class.google-auth__button-shell--busy]="disabled || isInitializing">
+    <div #buttonHost class="google-auth__button-host"></div>
+    <div class="google-auth__overlay" *ngIf="disabled || isInitializing">
+      <span>{{ isInitializing ? 'Loading Google…' : 'Please wait…' }}</span>
+    </div>
+  </div>
+
+  <p class="google-auth__error" *ngIf="errorMessage">{{ errorMessage }}</p>
+</section>

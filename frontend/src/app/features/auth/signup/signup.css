@@ -1,17 +1,16 @@
 .auth-container {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    padding: 24px;
-    /* Animated 3D Gradient Background */
+    justify-content: center;
+    min-height: 100dvh;
+    padding: 16px 20px 12px;
     background: var(--bg-gradient);
     background-size: 300% 300%;
-    animation: gradientBG 15s ease infinite;
+    animation: gradientBG 18s ease infinite;
     position: relative;
     overflow: hidden;
 }
 
-/* Optional: Subtle background glowing orbs for extra depth */
 .auth-container::before,
 .auth-container::after {
     content: '';
@@ -19,44 +18,39 @@
     border-radius: 50%;
     filter: blur(80px);
     z-index: 0;
-    animation: float 10s ease-in-out infinite;
+    animation: float 12s ease-in-out infinite;
 }
 
 .auth-container::before {
     background: var(--orb-primary);
-    /* Teal orb */
-    width: 400px;
-    height: 400px;
-    top: -100px;
-    left: -100px;
+    width: 320px;
+    height: 320px;
+    top: -70px;
+    left: -90px;
 }
 
 .auth-container::after {
     background: var(--orb-secondary);
-    /* Blue orb */
-    width: 350px;
-    height: 350px;
-    bottom: -50px;
-    right: -50px;
+    width: 280px;
+    height: 280px;
+    bottom: -30px;
+    right: -30px;
     animation-delay: -5s;
 }
 
 .auth-card {
     position: relative;
     z-index: 1;
-    /* Keep above orbs */
     width: 100%;
-    max-width: 440px;
+    max-width: 408px;
     margin: auto;
-    /* Glassmorphism Effect */
-    background-color: var(--glass-surface);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--glass-surface) 92%, transparent), color-mix(in srgb, var(--surface-color) 74%, transparent));
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--glass-shadow), inset 0 0 0 1px var(--glass-highlight);
-    /* Inner highlight for 3D rim */
-    padding: 48px 40px;
+    border-radius: 20px;
+    box-shadow: 0 18px 42px rgba(2, 12, 27, 0.24), inset 0 0 0 1px var(--glass-highlight);
+    padding: 30px 28px 24px;
     animation: slideUpGlass 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -103,7 +97,7 @@
 
 .auth-header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 22px;
 }
 
 .auth-header__top {
@@ -143,37 +137,39 @@
 }
 
 .auth-header h2 {
-    font-size: 1.75rem;
-    font-weight: 600;
+    font-size: 1.55rem;
+    font-weight: 700;
     color: var(--text-main);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    letter-spacing: -0.03em;
 }
 
 .auth-header p {
     color: var(--text-muted);
-    font-size: 0.95rem;
+    font-size: 0.92rem;
 }
 
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 18px;
 }
 
 .form-group label {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-muted);
-    margin-bottom: 8px;
-    letter-spacing: 0.3px;
+    margin-bottom: 7px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 .auth-card input {
     width: 100%;
-    padding: 16px 20px;
+    padding: 14px 16px;
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
+    border-radius: 14px;
     outline: none;
-    font-size: 1rem;
+    font-size: 0.98rem;
     color: var(--text-main);
     background-color: var(--input-bg);
     transition: all var(--transition-fast);
@@ -202,10 +198,10 @@
 
 .password-toggle-btn {
     position: absolute;
-    right: 12px;
+    right: 10px;
     background: transparent;
     border: none;
-    padding: 8px;
+    padding: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -237,29 +233,29 @@ input.invalid:focus {
 
 .full-width {
     width: 100%;
-    padding: 16px;
-    font-size: 1.05rem;
+    padding: 14px 16px;
+    font-size: 1rem;
     font-weight: 600;
-    margin-top: 16px;
-    letter-spacing: 0.5px;
-    border-radius: var(--radius-md);
+    margin-top: 12px;
+    letter-spacing: 0.02em;
+    border-radius: 14px;
 }
 
 .api-error {
     background-color: var(--error-bg);
     border-left: 4px solid var(--error);
-    padding: 12px 16px;
-    border-radius: 4px;
+    padding: 10px 14px;
+    border-radius: 10px;
     color: var(--error-text);
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 500;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .auth-footer {
-    margin-top: 32px;
+    margin-top: 18px;
     text-align: center;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
 }
 
@@ -310,10 +306,10 @@ input.invalid:focus {
 /* Global Footer */
 .global-footer {
     position: relative;
-    padding-top: 24px;
+    padding-top: 10px;
     text-align: center;
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     font-weight: 500;
     z-index: 2;
     text-shadow: 0 1px 2px color-mix(in srgb, var(--surface-color) 45%, transparent);
@@ -326,15 +322,16 @@ input.invalid:focus {
 /* Mobile Responsive */
 @media (max-width: 480px) {
     .auth-container {
-        padding: 16px;
+        padding: 12px;
     }
 
     .auth-card {
-        padding: 32px 24px;
+        max-width: 100%;
+        padding: 24px 20px 20px;
     }
 
     .auth-header h2 {
-        font-size: 1.5rem;
+        font-size: 1.35rem;
     }
 
     .auth-header__top {

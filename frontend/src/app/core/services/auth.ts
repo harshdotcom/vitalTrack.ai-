@@ -26,6 +26,12 @@ export interface UpdateProfilePayload {
   profile_pic?: File | null;
 }
 
+export interface AuthResponse {
+  message: string;
+  token: string;
+  user: AuthUser;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -34,17 +40,15 @@ export class AuthService {
   private tokenKey = 'auth_token';
   private userKey = 'auth_user';
 
-  login(credentials: any): Observable<any> {
-    return this.http.post(API_CONSTANTS.LOGIN_URL, credentials).pipe(
-      tap((res: any) => {
-        if (res && res.token) {
-          localStorage.setItem(this.tokenKey, res.token);
-        }
-        if (res?.user) {
-          const { password, ...safeUser } = res.user;
-          localStorage.setItem(this.userKey, JSON.stringify(safeUser));
-        }
-      })
+  login(credentials: { email: string; password: string }): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(API_CONSTANTS.LOGIN_URL, credentials).pipe(
+      tap((res) => this.persistAuthSession(res))
+    );
+  }
+
+  googleLogin(payload: { token: string }): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(API_CONSTANTS.GOOGLE_LOGIN_URL, payload).pipe(
+      tap((res) => this.persistAuthSession(res))
     );
   }
 
@@ -154,5 +158,13 @@ export class AuthService {
       const { password, ...safeUser } = res.user;
       localStorage.setItem(this.userKey, JSON.stringify(safeUser));
     }
+  }
+
+  private persistAuthSession(res: AuthResponse): void {
+    if (res?.token) {
+      localStorage.setItem(this.tokenKey, res.token);
+    }
+
+    this.persistUserFromResponse(res);
   }
 }

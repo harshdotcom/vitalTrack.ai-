@@ -20,6 +20,15 @@ func GetClaim(key string, claims map[string]interface{}) string {
 	return ""
 }
 
+func GetBoolClaim(key string, claims map[string]interface{}) bool {
+	if val, ok := claims[key]; ok && val != nil {
+		if flag, ok := val.(bool); ok {
+			return flag
+		}
+	}
+	return false
+}
+
 func GenerateOTP() models.OneTimePassword {
 	var oneTimePassword models.OneTimePassword
 	rand.Seed(time.Now().UnixNano())
